@@ -30,6 +30,37 @@ Lambda for tests only.
 
 ## Usage
 
+Import System Lambda's functions by adding
+
+    import static com.github.stefanbirkner.systemlambda.SystemLambda.*;
+
+to your tests.
+
+
+### Security Manager
+
+The function `withSecurityManager` lets you specify which `SecurityManager` is
+returned by `System.getSecurityManger()` while your code under test is
+executed.
+
+    @Test
+    void execute_code_with_specific_SecurityManager() {
+      SecurityManager securityManager = new ASecurityManager();
+      withSecurityManager(
+        securityManager,
+        () -> {
+          //code under test
+          //e.g. the following assertion is met
+          assertSame(
+            securityManager,
+            System.getSecurityManager()
+          );
+        }
+      );
+    }
+
+After the statement `withSecurityManager(...)` is executed
+`System.getSecurityManager()` will return the original security manager again.
 
 
 ## Contributing

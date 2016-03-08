@@ -1,5 +1,6 @@
 package org.junit.contrib.java.lang.system;
 
+import static com.github.stefanbirkner.systemlambda.SystemLambda.withSecurityManager;
 import static java.lang.System.getSecurityManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -111,27 +112,24 @@ public class ExpectedSystemExit implements TestRule {
 	}
 
 	public Statement apply(final Statement base, Description description) {
-		ProvideSecurityManager noExitSecurityManagerRule = createNoExitSecurityManagerRule();
-		Statement statement = createStatement(base);
-		return noExitSecurityManagerRule.apply(statement, description);
-	}
-
-	private ProvideSecurityManager createNoExitSecurityManagerRule() {
-		NoExitSecurityManager noExitSecurityManager = new NoExitSecurityManager(
-			getSecurityManager());
-		return new ProvideSecurityManager(noExitSecurityManager);
-	}
-
-	private Statement createStatement(final Statement base) {
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
-				try {
-					base.evaluate();
-				} catch (CheckExitCalled ignored) {
-				}
-				checkSystemExit();
-				checkAssertions();
+				withSecurityManager(
+					new NoExitSecurityManager(getSecurityManager()),
+					() -> {
+						try {
+							base.evaluate();
+						} catch (CheckExitCalled ignored) {
+						} catch (Exception e) {
+							throw e;
+						} catch (Throwable e) {
+							throw (Error) e;
+						}
+						checkSystemExit();
+						checkAssertions();
+					}
+				);
 			}
 		};
 	}
