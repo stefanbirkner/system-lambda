@@ -7,6 +7,9 @@ Work in progress. Please wait for the first release.
 System Lambda is a collection of functions for testing code which uses
 `java.lang.System`.
 
+System Lambda is published under the
+[MIT license](http://opensource.org/licenses/MIT).
+
 For JUnit 4 there is an alternative to Systen Lambda. Its name is
 [System Rules](http://stefanbirkner.github.io/system-rules/index.html).
 

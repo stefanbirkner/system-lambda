@@ -18,8 +18,8 @@
 	<inceptionYear>2018</inceptionYear>
 	<licenses>
 		<license>
-			<name>Common Public License Version 1.0</name>
-			<url>http://www.opensource.org/licenses/cpl1.0</url>
+			<name>MIT License</name>
+			<url>http://opensource.org/licenses/MIT</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
