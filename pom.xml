@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.github.stefanbirkner</groupId>
 		<artifactId>lib-parent</artifactId>
-		<version>8</version>
+		<version>16</version>
 	</parent>
 
 	<artifactId>system-lambda</artifactId>
@@ -29,6 +29,11 @@
 		<developerConnection>scm:git:git@github.com:stefanbirkner/system-lambda.git</developerConnection>
 		<url>https://github.com/stefanbirkner/system-lambda/</url>
 	</scm>
+
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -73,38 +78,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>java9</id>
-			<activation>
-				<jdk>[1.9,)</jdk>
-			</activation>
-			<properties>
-				<!-- Java 9 minimal source and target are 1.6 -->
-				<maven.compiler.source>1.6</maven.compiler.source>
-				<maven.compiler.target>1.6</maven.compiler.target>
-			</properties>
-
-			<build>
-				<!-- Use Java9 compatible version of plugins -->
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<artifactId>maven-jar-plugin</artifactId>
-							<version>3.0.2</version>
-						</plugin>
-						<plugin>
-							<artifactId>maven-javadoc-plugin</artifactId>
-							<version>3.0.0-M1</version>
-						</plugin>
-						<plugin>
-							<artifactId>maven-source-plugin</artifactId>
-							<version>3.0.1</version>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-	</profiles>
 </project>

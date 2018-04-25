@@ -1,11 +1,7 @@
 language: java
-install: ./mvnw install -DskipTests=true -Dgpg.skip=true
-addons:
-  apt:
-    packages:
-      - openjdk-6-jdk
+dist: trusty
+install: ./mvnw install -DskipTests -Dgpg.skip
+script: ./mvnw verify javadoc:javadoc -DskipTests -Dgpg.skip
 jdk:
   - oraclejdk9
   - oraclejdk8
-  - openjdk7
-  - openjdk6

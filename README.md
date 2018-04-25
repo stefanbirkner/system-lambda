@@ -8,7 +8,7 @@ System Lambda is a collection of functions for testing code which uses
 `java.lang.System`.
 
 System Lambda is published under the
-[MIT license](http://opensource.org/licenses/MIT).
+[MIT license](http://opensource.org/licenses/MIT). It requires at least Java 8.
 
 For JUnit 4 there is an alternative to Systen Lambda. Its name is
 [System Rules](http://stefanbirkner.github.io/system-rules/index.html).
@@ -67,5 +67,5 @@ servers.
 * Set the new version in `pom.xml` and in the `Installation` section of
   this readme.
 * Commit the modified `pom.xml` and `README.md`.
-* Run `mvnw clean deploy` with JDK 6 or 7.
+* Run `mvnw clean deploy` with JDK 8.
 * Add a tag for the release: `git tag system-lambda-X.X.X`
