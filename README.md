@@ -100,6 +100,29 @@ other tests.
       //E.g. it is not set.
     }
 
+
+### System.exit
+
+Command-line applications terminate by calling `System.exit` with some status
+code. If you test such an application then the JVM that runs the test would exit
+when the application under test calls `System.exit`. You can avoid this with the
+method `catchSystemExit` which also provides the status code of the`System.exit`
+call.
+
+
+    @Test
+    void catch_status_code_of_System_exit() {
+      int statusCode = catchSystemExit(() -> {
+        System.exit(42);
+      });
+      assertEquals(42, statusCode);
+    }
+
+The method `catchSystemExit` throws an `AssertionError` if the code under test
+does not call `System.exit`. Therefore your test fails with a failure message
+"System.exit has not been called."
+
+     
 ### System.out and System.err
 
 Command-line applications usually write to the console. If you write such
