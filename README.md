@@ -63,6 +63,28 @@ After the statement `withSecurityManager(...)` is executed
 `System.getSecurityManager()` will return the original security manager again.
 
 
+### System Properties
+
+The function `restoreSystemProperties` guarantees that after executing the test
+code each System property has the same value like before. Therefore you
+can modify System properties inside of the test code without having an impact on
+other tests.
+
+    @Test
+    void execute_code_that_manipulates_system_properties() {
+      restoreSystemProperties(
+        () -> {
+          System.setProperty("some.property", "some value");
+          //code under test that reads properties (e.g. "some.property") or
+          //modifies them.
+        }
+      );
+      
+      //Here the value of "some.property" is the same like before.
+      //E.g. it is not set.
+    }
+
+
 ## Contributing
 
 You have three options if you have a feature request, found a bug or

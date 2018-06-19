@@ -1,5 +1,6 @@
 package org.junit.contrib.java.lang.system;
 
+import static com.github.stefanbirkner.systemlambda.SystemLambda.restoreSystemProperties;
 import static java.lang.String.format;
 import static java.lang.System.setErr;
 import static java.lang.System.setProperty;
@@ -347,25 +348,21 @@ public class SystemErrRuleTest {
 
 	@RunWith(AcceptanceTestRunner.class)
 	public static class log_is_provided_with_new_line_characters_only_if_requested {
-		@ClassRule
-		public static final RestoreSystemProperties RESTORE_SYSTEM_PROPERTIES
-			= new RestoreSystemProperties();
-
-		@BeforeClass
-		public static void useWindowsLineSeparator() {
-			setProperty("line.separator", "\r\n");
-		}
-
 		public static class TestClass {
 			@Rule
 			public final SystemErrRule systemErrRule = new SystemErrRule()
 				.enableLog();
 
 			@Test
-			public void test() {
-				System.err.print(format("dummy%ntext%n"));
-				assertThat(systemErrRule.getLogWithNormalizedLineSeparator())
-					.isEqualTo("dummy\ntext\n");
+			public void test() throws Exception {
+				restoreSystemProperties(
+					() -> {
+						setProperty("line.separator", "\r\n");
+						System.err.print(format("dummy%ntext%n"));
+						assertThat(systemErrRule.getLogWithNormalizedLineSeparator())
+							.isEqualTo("dummy\ntext\n");
+					}
+				);
 			}
 		}
 
