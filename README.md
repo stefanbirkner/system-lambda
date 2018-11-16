@@ -84,6 +84,20 @@ other tests.
       //E.g. it is not set.
     }
 
+### System.in, System.out and System.err
+
+You can assert that nothing is written to `System.err` by wrapping code with the
+function `assertNothingWrittenToSystemErr`. E.g. the following test fails:
+
+    @Test
+    void fails_because_something_is_written_to_System_err() {
+      assertNothingWrittenToSystemErr(
+        () -> {
+          System.err.println("some text");
+        }
+      );
+    }
+
 
 ## Contributing
 

@@ -1,5 +1,9 @@
 package com.github.stefanbirkner.systemlambda;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 import static java.lang.System.*;
@@ -54,8 +58,60 @@ import static java.lang.System.*;
  *   );
  * }
  * </pre>
+ *
+ * <h2>System.in, System.out and System.err</h2>
+ *
+ * <p>You can assert that nothing is written to {@code System.err} by wrapping
+ * code with the function {@link #assertNothingWrittenToSystemErr(Statement)
+ * assertNothingWrittenToSystemErr}. E.g. the following test fails:
+ * <pre>
+ * &#064;Test
+ * void fails_because_something_is_written_to_System_err() {
+ *   assertNothingWrittenToSystemErr(
+ *     () -&gt; {
+ *        System.err.println("some text");
+ *     }
+ *   );
+ * }
+ * </pre>
  */
 public class SystemLambda {
+
+	private static final boolean AUTO_FLUSH = true;
+	private static final String DEFAULT_ENCODING = Charset.defaultCharset().name();
+
+	/**
+	 * Executes the statement and fails (throws an {@code AssertionError}) if
+	 * the statement tries to write to {@code System.err}.
+	 * <p>The following test fails
+	 * <pre>
+	 * &#064;Test
+	 * public void fails_because_something_is_written_to_System_err() {
+	 *   assertNothingWrittenToSystemErr(
+	 *     () -&gt; {
+	 *       System.err.println("some text");
+	 *     }
+	 *   );
+	 * }
+	 * </pre>
+	 * The test fails with the failure "Tried to write 's' to System.err
+	 * although this is not allowed."
+	 *
+	 * @param statement an arbitrary piece of code.
+	 * @throws Exception any exception thrown by the statement or an
+	 *                   {@code AssertionError} if the statement tries to write
+	 *                   to {@code System.err}.
+	 * @since 1.0.0
+	 */
+	public static void assertNothingWrittenToSystemErr(
+		Statement statement
+	) throws Exception {
+		executeWithSystemErrReplacement(
+			new DisallowWriteStream(),
+			statement
+		);
+	}
+
 	/**
 	 * Executes the statement and restores the system properties after the
 	 * statement has been executed. This allows you to set or clear system
@@ -147,4 +203,38 @@ public class SystemLambda {
             setSecurityManager(originalSecurityManager);
         }
     }
+
+	private static void executeWithSystemErrReplacement(
+		OutputStream replacementForErr,
+		Statement statement
+	) throws Exception {
+		PrintStream originalStream = err;
+		try {
+			setErr(wrap(replacementForErr));
+			statement.execute();
+		} finally {
+			setErr(originalStream);
+		}
+	}
+
+	private static PrintStream wrap(
+		OutputStream outputStream
+	) throws UnsupportedEncodingException {
+		return new PrintStream(
+			outputStream,
+			AUTO_FLUSH,
+			DEFAULT_ENCODING
+		);
+	}
+
+	private static class DisallowWriteStream extends OutputStream {
+		@Override
+		public void write(int b) {
+			throw new AssertionError(
+				"Tried to write '"
+					+ (char) b
+					+ "' although this is not allowed."
+			);
+		}
+	}
 }
