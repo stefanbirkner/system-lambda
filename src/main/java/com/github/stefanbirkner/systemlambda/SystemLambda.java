@@ -61,15 +61,26 @@ import static java.lang.System.*;
  *
  * <h2>System.in, System.out and System.err</h2>
  *
- * <p>You can assert that nothing is written to {@code System.err} by wrapping
- * code with the function {@link #assertNothingWrittenToSystemErr(Statement)
- * assertNothingWrittenToSystemErr}. E.g. the following test fails:
+ * <p>You can assert that nothing is written to
+ * {@code System.err}/{@code System.out} by wrapping code with the function
+ * {@link #assertNothingWrittenToSystemErr(Statement)
+ * assertNothingWrittenToSystemErr}/{@link #assertNothingWrittenToSystemOut(Statement)
+ * assertNothingWrittenToSystemOut}. E.g. the following tests fail:
  * <pre>
  * &#064;Test
  * void fails_because_something_is_written_to_System_err() {
  *   assertNothingWrittenToSystemErr(
  *     () -&gt; {
  *        System.err.println("some text");
+ *     }
+ *   );
+ * }
+ *
+ * &#064;Test
+ * void fails_because_something_is_written_to_System_out() {
+ *   assertNothingWrittenToSystemOut(
+ *     () -&gt; {
+ *        System.out.println("some text");
  *     }
  *   );
  * }
@@ -101,12 +112,46 @@ public class SystemLambda {
 	 * @throws Exception any exception thrown by the statement or an
 	 *                   {@code AssertionError} if the statement tries to write
 	 *                   to {@code System.err}.
+	 * @see #assertNothingWrittenToSystemOut(Statement)
 	 * @since 1.0.0
 	 */
 	public static void assertNothingWrittenToSystemErr(
 		Statement statement
 	) throws Exception {
 		executeWithSystemErrReplacement(
+			new DisallowWriteStream(),
+			statement
+		);
+	}
+
+	/**
+	 * Executes the statement and fails (throws an {@code AssertionError}) if
+	 * the statement tries to write to {@code System.out}.
+	 * <p>The following test fails
+	 * <pre>
+	 * &#064;Test
+	 * public void fails_because_something_is_written_to_System_out() {
+	 *   assertNothingWrittenToSystemOut(
+	 *     () -&gt; {
+	 *       System.out.println("some text");
+	 *     }
+	 *   );
+	 * }
+	 * </pre>
+	 * The test fails with the failure "Tried to write 's' to System.out
+	 * although this is not allowed."
+	 *
+	 * @param statement an arbitrary piece of code.
+	 * @throws Exception any exception thrown by the statement or an
+	 *                   {@code AssertionError} if the statement tries to write
+	 *                   to {@code System.out}.
+	 * @see #assertNothingWrittenToSystemErr(Statement)
+	 * @since 1.0.0
+	 */
+	public static void assertNothingWrittenToSystemOut(
+		Statement statement
+	) throws Exception {
+		executeWithSystemOutReplacement(
 			new DisallowWriteStream(),
 			statement
 		);
@@ -214,6 +259,19 @@ public class SystemLambda {
 			statement.execute();
 		} finally {
 			setErr(originalStream);
+		}
+	}
+
+	private static void executeWithSystemOutReplacement(
+		OutputStream replacementForOut,
+		Statement statement
+	) throws Exception {
+		PrintStream originalStream = out;
+		try {
+			setOut(wrap(replacementForOut));
+			statement.execute();
+		} finally {
+			setOut(originalStream);
 		}
 	}
 
