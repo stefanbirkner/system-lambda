@@ -1,5 +1,6 @@
 package com.github.stefanbirkner.systemlambda;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -60,6 +61,55 @@ import static java.lang.System.*;
  * </pre>
  *
  * <h2>System.in, System.out and System.err</h2>
+ * <p>Command-line applications usually write to the console. If you write such
+ * applications you need to test the output of these applications. The methods
+ * {@link #tapSystemErr(Statement) tapSystemErr},
+ * {@link #tapSystemErrNormalized(Statement) tapSystemErrNormalized},
+ * {@link #tapSystemOut(Statement) tapSystemOut} and
+ * {@link #tapSystemOutNormalized(Statement) tapSystemOutNormalized} allow you
+ * to tap the text that is written to {@code System.err}/{@code System.out}. The
+ * methods with the suffix {@code Normalized} normalize line breaks to
+ * {@code \n} so that you can run tests with the same assertions on Linux,
+ * macOS and Windows.
+ *
+ * <pre>
+ * &#064;Test
+ * void check_text_written_to_System_err() throws Exception {
+ *   String text = tapSystemErr(
+ *     () -&gt; System.err.println("some text")
+ *   );
+ *   assertEquals(text, "some text");
+ * }
+ *
+ * &#064;Test
+ * void check_multiple_lines_written_to_System_err() throws Exception {
+ *   String text = tapSystemErrNormalized(
+ *     () -&gt; {
+ *       System.err.println("first line");
+ *       System.err.println("second line");
+ *     }
+ *   );
+ *   assertEquals(text, "first line\nsecond line");
+ * }
+ *
+ * &#064;Test
+ * void check_text_written_to_System_out() throws Exception {
+ *   String text = tapSystemOut(
+ *     () -&gt; System.out.println("some text")
+ *   );
+ *   assertEquals(text, "some text");
+ * }
+ *
+ * &#064;Test
+ * void check_multiple_lines_written_to_System_out() throws Exception {
+ *   String text = tapSystemOutNormalized(
+ *     () -&gt; {
+ *       System.out.println("first line");
+ *       System.out.println("second line");
+ *     }
+ *   );
+ *   assertEquals(text, "first line\nsecond line");
+ * }</pre>
  *
  * <p>You can assert that nothing is written to
  * {@code System.err}/{@code System.out} by wrapping code with the function
@@ -244,6 +294,128 @@ public class SystemLambda {
 	}
 
 	/**
+	 * {@code tapSystemErr} returns a String with the text that is written to
+	 * {@code System.err} by the provided piece of code.
+	 * <pre>
+	 * &#064;Test
+	 * public void check_the_text_that_is_written_to_System_err() {
+	 *   String textWrittenToSystemErr = tapSystemErr(
+	 *     () -&gt; {
+	 *       System.err.print("some text");
+	 *     }
+	 *   );
+	 *   assertEquals("some text", textWrittenToSystemErr);
+	 * }
+	 * </pre>
+	 *
+	 * @param statement an arbitrary piece of code.
+	 * @return text that is written to {@code System.err} by the statement.
+	 * @throws Exception any exception thrown by the statement.
+	 * @see #tapSystemOut(Statement)
+	 * @since 1.0.0
+	 */
+	public static String tapSystemErr(
+		Statement statement
+	) throws Exception {
+		TapStream tapStream = new TapStream();
+		executeWithSystemErrReplacement(
+			tapStream,
+			statement
+		);
+		return tapStream.textThatWasWritten();
+	}
+
+	/**
+	 * {@code tapSystemOut} returns a String with the text that is written to
+	 * {@code System.out} by the provided piece of code.
+	 * <pre>
+	 * &#064;Test
+	 * public void check_the_text_that_is_written_to_System_out() {
+	 *   String textWrittenToSystemOut = tapSystemOut(
+	 *     () -&gt; {
+	 *       System.out.print("some text");
+	 *     }
+	 *   );
+	 *   assertEquals("some text", textWrittenToSystemOut);
+	 * }
+	 * </pre>
+	 *
+	 * @param statement an arbitrary piece of code.
+	 * @return text that is written to {@code System.out} by the statement.
+	 * @throws Exception any exception thrown by the statement.
+	 * @see #tapSystemErr(Statement)
+	 * @since 1.0.0
+	 */
+	public static String tapSystemOut(
+		Statement statement
+	) throws Exception {
+		TapStream tapStream = new TapStream();
+		executeWithSystemOutReplacement(
+			tapStream,
+			statement
+		);
+		return tapStream.textThatWasWritten();
+	}
+
+	/**
+	 * {@code tapSystemErrNormalized} returns a String with the text that is
+	 * written to {@code System.err} by the provided piece of code. New line
+	 * characters are replaced with a single {@code \n}.
+	 * <pre>
+	 * &#064;Test
+	 * public void check_the_text_that_is_written_to_System_err() {
+	 *   String textWrittenToSystemErr = tapSystemErrNormalized(
+	 *     () -&gt; {
+	 *       System.err.println("some text");
+	 *     }
+	 *   );
+	 *   assertEquals("some text\n", textWrittenToSystemErr);
+	 * }
+	 * </pre>
+	 *
+	 * @param statement an arbitrary piece of code.
+	 * @return text that is written to {@code System.err} by the statement.
+	 * @throws Exception any exception thrown by the statement.
+	 * @see #tapSystemOut(Statement)
+	 * @since 1.0.0
+	 */
+	public static String tapSystemErrNormalized(
+		Statement statement
+	) throws Exception {
+		return tapSystemErr(statement)
+			.replace(lineSeparator(), "\n");
+	}
+
+	/**
+	 * {@code tapSystemOutNormalized} returns a String with the text that is
+	 * written to {@code System.out} by the provided piece of code. New line
+	 * characters are replaced with a single {@code \n}.
+	 * <pre>
+	 * &#064;Test
+	 * public void check_the_text_that_is_written_to_System_out() {
+	 *   String textWrittenToSystemOut = tapSystemOutNormalized(
+	 *     () -&gt; {
+	 *       System.out.println("some text");
+	 *     }
+	 *   );
+	 *   assertEquals("some text\n", textWrittenToSystemOut);
+	 * }
+	 * </pre>
+	 *
+	 * @param statement an arbitrary piece of code.
+	 * @return text that is written to {@code System.out} by the statement.
+	 * @throws Exception any exception thrown by the statement.
+	 * @see #tapSystemErr(Statement)
+	 * @since 1.0.0
+	 */
+	public static String tapSystemOutNormalized(
+		Statement statement
+	) throws Exception {
+		return tapSystemOut(statement)
+			.replace(lineSeparator(), "\n");
+	}
+
+	/**
 	 * Executes the statement and restores the system properties after the
 	 * statement has been executed. This allows you to set or clear system
 	 * properties within the statement without affecting other tests.
@@ -387,6 +559,21 @@ public class SystemLambda {
 		public void write(
 			int b
 		) {
+		}
+	}
+
+	private static class TapStream extends OutputStream {
+		final ByteArrayOutputStream text = new ByteArrayOutputStream();
+
+		@Override
+		public void write(
+			int b
+		) {
+			text.write(b);
+		}
+
+		String textThatWasWritten() {
+			return text.toString();
 		}
 	}
 }

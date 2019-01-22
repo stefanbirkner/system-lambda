@@ -86,6 +86,56 @@ other tests.
 
 ### System.in, System.out and System.err
 
+Command-line applications usually write to the console. If you write such
+applications you need to test the output of these applications. The methods
+`tapSystemErr`, `tapSystemErrNormalized`, `tapSystemOut` and
+`tapSystemOutNormalized` allow you to tap the text that is written to
+`System.err`/`System.out`. The methods with the suffix `Normalized` normalize
+line breaks to `\n` so that you can run tests with the same assertions on Linux,
+macOS and Windows.
+
+    @Test
+	void check_text_written_to_System_err(
+	) throws Exception {
+		String text = tapSystemErr(
+			() -> System.err.println("some text")
+		);
+		assertEquals(text, "some text");
+	}
+
+    @Test
+	void check_multiple_lines_written_to_System_err(
+	) throws Exception {
+		String text = tapSystemErrNormalized(
+			() -> {
+			    System.err.println("first line");
+			    System.err.println("second line");
+			}
+		);
+		assertEquals(text, "first line\nsecond line");
+	}
+    
+    @Test
+	void check_text_written_to_System_out(
+	) throws Exception {
+		String text = tapSystemOut(
+			() -> System.out.println("some text")
+		);
+		assertEquals(text, "some text");
+	}
+
+    @Test
+	void check_multiple_lines_written_to_System_out(
+	) throws Exception {
+		String text = tapSystemOutNormalized(
+			() -> {
+			    System.out.println("first line");
+			    System.out.println("second line");
+			}
+		);
+		assertEquals(text, "first line\nsecond line");
+	}
+
 You can assert that nothing is written to `System.err`/`System.out` by wrapping
 code with the function
 `assertNothingWrittenToSystemErr`/`assertNothingWrittenToSystemOut`. E.g. the
