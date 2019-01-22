@@ -109,6 +109,30 @@ following tests fail:
       );
     }
 
+If the code under test writes text to `System.err`/`System.out` then it is
+intermixed with the output of your build tool. Therefore you may want to avoid
+that the code under test writes to `System.err`/`System.out`. You can achieve
+this with the function `muteSystemErr`/`muteSystemOut`. E.g. the following tests
+don't write anything to `System.err`/`System.out`:
+
+    @Test
+    void nothing_is_written_to_System_err() {
+      muteSystemErr(
+        () -> {
+          System.err.println("some text");
+        }
+      );
+    }
+
+    @Test
+    void nothing_is_written_to_System_out() {
+      muteSystemOut(
+        () -> {
+          System.out.println("some text");
+        }
+      );
+    }
+
 
 ## Contributing
 

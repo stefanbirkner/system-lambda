@@ -85,6 +85,34 @@ import static java.lang.System.*;
  *   );
  * }
  * </pre>
+ *
+ * <p>If the code under test writes text to
+ * {@code System.err}/{@code System.out} then it is intermixed with the output
+ * of your build tool. Therefore you may want to avoid that the code under test
+ * writes to {@code System.err}/{@code System.out}. You can achieve this with
+ * the function {@link #muteSystemErr(Statement)
+ * muteSystemErr}/{@link #muteSystemOut(Statement) muteSystemOut}. E.g. the
+ * following tests don't write anything to
+ * {@code System.err}/{@code System.out}:
+ * <pre>
+ * &#064;Test
+ * void nothing_is_written_to_System_err() {
+ *   muteSystemErr(
+ *     () -&gt; {
+ *        System.err.println("some text");
+ *     }
+ *   );
+ * }
+ *
+ * &#064;Test
+ * void nothing_is_written_to_System_out() {
+ *   muteSystemOut(
+ *     () -&gt; {
+ *        System.out.println("some text");
+ *     }
+ *   );
+ * }
+ * </pre>
  */
 public class SystemLambda {
 
@@ -153,6 +181,64 @@ public class SystemLambda {
 	) throws Exception {
 		executeWithSystemOutReplacement(
 			new DisallowWriteStream(),
+			statement
+		);
+	}
+
+	/**
+	 * Usually the output of a test to {@code System.err} does not have to be
+	 * visible. It may even slowdown the test. {@code muteSystemErr} can be
+	 * used to suppress this output.
+	 * <pre>
+	 * &#064;Test
+	 * public void nothing_is_written_to_System_err() {
+	 *   muteSystemErr(
+	 *     () -&gt; {
+	 *       System.err.println("some text");
+	 *     }
+	 *   );
+	 * }
+	 * </pre>
+	 *
+	 * @param statement an arbitrary piece of code.
+	 * @throws Exception any exception thrown by the statement.
+	 * @see #muteSystemOut(Statement)
+	 * @since 1.0.0
+	 */
+	public static void muteSystemErr(
+		Statement statement
+	) throws Exception {
+		executeWithSystemErrReplacement(
+			new NoopStream(),
+			statement
+		);
+	}
+
+	/**
+	 * Usually the output of a test to {@code System.out} does not have to be
+	 * visible. It may even slowdown the test. {@code muteSystemOut} can be
+	 * used to suppress this output.
+	 * <pre>
+	 * &#064;Test
+	 * public void nothing_is_written_to_System_out() {
+	 *   muteSystemOut(
+	 *     () -&gt; {
+	 *       System.out.println("some text");
+	 *     }
+	 *   );
+	 * }
+	 * </pre>
+	 *
+	 * @param statement an arbitrary piece of code.
+	 * @throws Exception any exception thrown by the statement.
+	 * @see #muteSystemErr(Statement)
+	 * @since 1.0.0
+	 */
+	public static void muteSystemOut(
+		Statement statement
+	) throws Exception {
+		executeWithSystemOutReplacement(
+			new NoopStream(),
 			statement
 		);
 	}
@@ -293,6 +379,14 @@ public class SystemLambda {
 					+ (char) b
 					+ "' although this is not allowed."
 			);
+		}
+	}
+
+	private static class NoopStream extends OutputStream {
+		@Override
+		public void write(
+			int b
+		) {
 		}
 	}
 }

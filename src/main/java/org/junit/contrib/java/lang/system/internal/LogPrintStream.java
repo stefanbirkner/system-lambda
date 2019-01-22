@@ -22,18 +22,13 @@ public class LogPrintStream {
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
-				try {
-					printStreamHandler.createRestoreStatement(new Statement() {
-						@Override
-						public void evaluate() throws Throwable {
-							printStreamHandler.replaceCurrentStreamWithOutputStream(muteableLogStream);
-							base.evaluate();
-						}
-					}).evaluate();
-				} catch (Throwable e) {
-					muteableLogStream.failureLog.writeTo(printStreamHandler.getStream());
-					throw e;
-				}
+				printStreamHandler.createRestoreStatement(new Statement() {
+					@Override
+					public void evaluate() throws Throwable {
+						printStreamHandler.replaceCurrentStreamWithOutputStream(muteableLogStream);
+						base.evaluate();
+					}
+				}).evaluate();
 			}
 		};
 	}
@@ -66,21 +61,9 @@ public class LogPrintStream {
 		return getLog().replace(lineSeparator, "\n");
 	}
 
-	public void mute() {
-		muteableLogStream.originalStreamMuted = true;
-	}
-
-	public void muteForSuccessfulTests() {
-		mute();
-		muteableLogStream.failureLogMuted = false;
-	}
-
 	private static class MuteableLogStream extends OutputStream {
 		final OutputStream originalStream;
-		final ByteArrayOutputStream failureLog = new ByteArrayOutputStream();
 		final ByteArrayOutputStream log = new ByteArrayOutputStream();
-		boolean originalStreamMuted = false;
-		boolean failureLogMuted = true;
 		boolean logMuted = true;
 
 		MuteableLogStream(OutputStream originalStream) {
@@ -89,10 +72,7 @@ public class LogPrintStream {
 
 		@Override
 		public void write(int b) throws IOException {
-			if (!originalStreamMuted)
-				originalStream.write(b);
-			if (!failureLogMuted)
-				failureLog.write(b);
+			originalStream.write(b);
 			if (!logMuted)
 				log.write(b);
 		}
