@@ -1,0 +1,9 @@
+<FindBugsFilter>
+	<!-- using default encoding here is correct because System.err and
+	     System.out use it. -->
+	<Match>
+		<Class name="com.github.stefanbirkner.systemlambda.SystemLambda$TapStream" />
+		<Method name="textThatWasWritten" />
+		<Bug pattern="DM_DEFAULT_ENCODING" />
+	</Match>
+</FindBugsFilter>
