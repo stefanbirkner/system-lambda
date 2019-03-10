@@ -63,6 +63,22 @@ After the statement `withSecurityManager(...)` is executed
 `System.getSecurityManager()` will return the original security manager again.
 
 
+### Environment Variables
+
+The method `withEnvironmentVariable` allows you to set environment variables
+within your test code that are removed after you code under test is executed.
+
+    @Test
+    void set_environment_variables() throws Exception {
+      withEnvironmentVariable("first", "first value")
+        .and("second", "second value")
+        .execute(() -> {
+          assertEquals("first value", System.getenv("first"));
+          assertEquals("second value", System.getenv("second"));
+        });
+	}
+
+
 ### System Properties
 
 The function `restoreSystemProperties` guarantees that after executing the test
