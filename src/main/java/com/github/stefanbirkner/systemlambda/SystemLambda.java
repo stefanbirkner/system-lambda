@@ -1,9 +1,6 @@
 package com.github.stefanbirkner.systemlambda;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -12,7 +9,10 @@ import java.util.Properties;
 
 import static java.lang.Class.forName;
 import static java.lang.System.*;
+import static java.nio.charset.Charset.defaultCharset;
+import static java.util.Arrays.stream;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.joining;
 
 /**
  * {@code SystemLambda} is a collection of functions for testing code
@@ -184,6 +184,75 @@ import static java.util.Collections.singletonMap;
  *     }
  *   );
  * }
+ * </pre>
+ *
+ * <h2>System.in</h2>
+ *
+ * <p>Interactive command-line applications read from {@code System.in}. If you
+ * write such applications you need to provide input to these applications. You
+ * can specify the lines that are available from `{@code System.in} with the
+ * method {@link #withTextFromSystemIn(String...) withTextFromSystemIn}
+ * <pre>
+ * &#064;Test
+ * void readTextFromSystemIn() {
+ *   withTextFromSystemIn("first line", "second line")
+ *     .execute(() -&gt; {
+ *       Scanner scanner = new Scanner(System.in);
+ *       scanner.nextLine();
+ *       assertEquals("first line", scanner.nextLine());
+ *     });
+ * }
+ * </pre>
+ *
+ * For a complete test coverage you may also want to simulate `System.in` throwing
+ * exceptions when the application reads from it. You can specify such an
+ * exception (either `RuntimeException` or `IOException` after specifying the text.
+ * The exception will be thrown by the next `read` after the text has been
+ * consumed.
+ * <pre>
+ * &#064;Test
+ * void readTextFromSystemInWithIOException() {
+ *   withTextFromSystemIn("first line", "second line")
+ *     .andExceptionThrownOnInputEnd(new IOException())
+ *     .execute(() -&gt; {
+ *       Scanner scanner = new Scanner(System.in);
+ *       scanner.nextLine();
+ *       scanner.nextLine();
+ *       assertThrownBy(
+ *         IOException.class,
+ *         () -&gt; scanner.readLine()
+ *       );
+ *   });
+ * }
+ *
+ * &#064;Test
+ * void readTextFromSystemInFailsWithRuntimeException() {
+ *   withTextFromSystemIn("first line", "second line")
+ *     .andExceptionThrownOnInputEnd(new RuntimeException())
+ *     .execute(() -&gt; {
+ *       Scanner scanner = new Scanner(System.in);
+ *       scanner.nextLine();
+ *       scanner.nextLine();
+ *       assertThrownBy(
+ *	        RuntimeException.class,
+ *          () -&gt; scanner.readLine()
+ *       );
+ * 	   });
+ * }
+ * </pre>
+ *
+ * You can write a test that throws an exception immediately by not providing any
+ * text.
+ * <pre>
+ * withTextFromSystemIn()
+ *   .andExceptionThrownOnInputEnd(...)
+ *   .execute(() -&gt; {
+ *     Scanner scanner = new Scanner(System.in);
+ *     assertThrownBy(
+ *     ...,
+ *     () -&gt; scanner.readLine()
+ *   );
+ * });
  * </pre>
  */
 public class SystemLambda {
@@ -579,6 +648,80 @@ public class SystemLambda {
         }
     }
 
+	/**
+	 * Executes the statement and lets {@code System.in} provide the specified
+	 * text during the execution. In addition several Exceptions can be
+	 * specified that are thrown when {@code System.in#read} is called.
+	 *
+	 * <pre>
+	 *   public void MyTest {
+	 *
+	 *     &#064;Test
+	 *     public void readTextFromStandardInputStream() {
+	 *       withTextFromSystemIn("first line", "second line")
+	 *         .execute(() -&gt; {
+	 *           Scanner scanner = new Scanner(System.in);
+	 *           scanner.nextLine();
+	 *           assertEquals("first line", scanner.nextLine());
+	 *         });
+	 *     }
+	 *   }
+	 * </pre>
+	 *
+	 * <h3>Throwing Exceptions</h3>
+	 * <p>You can also simulate a {@code System.in} that throws an
+	 * {@code IOException} or {@code RuntimeException}. Use
+	 *
+	 * <pre>
+	 *   public void MyTest {
+	 *
+	 *     &#064;Test
+	 *     public void readTextFromStandardInputStreamFailsWithIOException() {
+	 *       withTextFromSystemIn()
+	 *         .andExceptionThrownOnInputEnd(new IOException())
+	 *         .execute(() -&gt; {
+	 *           assertThrownBy(
+	 *             IOException.class,
+	 *             () -&gt; new Scanner(System.in).readLine())
+	 *           );
+	 *         )};
+	 *     }
+	 *
+	 *     &#064;Test
+	 *     public void readTextFromStandardInputStreamFailsWithRuntimeException() {
+	 *       withTextFromSystemIn()
+	 *         .andExceptionThrownOnInputEnd(new RuntimeException())
+	 *         .execute(() -&gt; {
+	 *           assertThrownBy(
+	 *             RuntimeException.class,
+	 *             () -&gt; new Scanner(System.in).readLine())
+	 *           );
+	 *         )};
+	 *     }
+	 *   }
+	 * </pre>
+	 * <p>If you provide text as parameters of {@code withTextFromSystemIn(...)}
+	 * in addition then the exception is thrown after the text has been read
+	 * from {@code System.in}.
+	 * @param lines the lines that are available from {@code System.in}.
+	 * @return an {@link SystemInStub} instance that is used to execute a
+	 * statement with its {@link SystemInStub#execute(Statement) execute}
+	 * method. In addition it can be used to specify an exception that is thrown
+	 * after the text is read.
+	 * @since 1.0.0
+	 * @see SystemInStub#execute(Statement)
+	 * @see SystemInStub#andExceptionThrownOnInputEnd(IOException)
+	 * @see SystemInStub#andExceptionThrownOnInputEnd(RuntimeException)
+	 */
+    public static SystemInStub withTextFromSystemIn(
+    	String... lines
+	) {
+    	String text = stream(lines)
+			.map(line -> line + getProperty("line.separator"))
+			.collect(joining());
+    	return new SystemInStub(text);
+	}
+
 	private static void executeWithSystemErrReplacement(
 		OutputStream replacementForErr,
 		Statement statement
@@ -855,6 +998,134 @@ public class SystemLambda {
 			Field field = klass.getDeclaredField(name);
 			field.setAccessible(true);
 			return (Map<String, String>) field.get(object);
+		}
+	}
+
+	public static class SystemInStub {
+		private IOException ioException;
+		private RuntimeException runtimeException;
+		private final String text;
+
+		private SystemInStub(String text) {
+			this.text = text;
+		}
+
+		public SystemInStub andExceptionThrownOnInputEnd(
+			IOException exception
+		) {
+			if (runtimeException != null)
+				throw new IllegalStateException("You cannot call"
+					+ " andExceptionThrownOnInputEnd(IOException) because"
+					+ " andExceptionThrownOnInputEnd(RuntimeException) has"
+					+ " already been called.");
+			this.ioException = exception;
+			return this;
+		}
+
+		public SystemInStub andExceptionThrownOnInputEnd(
+			RuntimeException exception
+		) {
+			if (ioException != null)
+				throw new IllegalStateException("You cannot call"
+					+ " andExceptionThrownOnInputEnd(RuntimeException) because"
+					+ " andExceptionThrownOnInputEnd(IOException) has already"
+					+ " been called.");
+			this.runtimeException = exception;
+			return this;
+		}
+
+		public void execute(
+			Statement statement
+		) throws Exception {
+			InputStream stubStream = new ReplacementInputStream(
+				text, ioException, runtimeException
+			);
+			InputStream originalIn = System.in;
+			try {
+				setIn(stubStream);
+				statement.execute();
+			} finally {
+				setIn(originalIn);
+			}
+		}
+
+
+		private static class ReplacementInputStream extends InputStream {
+			private final StringReader reader;
+			private final IOException ioException;
+			private final RuntimeException runtimeException;
+
+			ReplacementInputStream(
+				String text,
+				IOException ioException,
+				RuntimeException runtimeException
+			) {
+				this.reader = new StringReader(text);
+				this.ioException = ioException;
+				this.runtimeException = runtimeException;
+			}
+
+			@Override
+			public int read() throws IOException {
+				int character = reader.read();
+				if (character == -1)
+					handleEmptyReader();
+				return character;
+			}
+
+			private void handleEmptyReader() throws IOException {
+				if (ioException != null)
+					throw ioException;
+				else if (runtimeException != null)
+					throw runtimeException;
+			}
+
+			@Override
+			public int read(byte[] buffer, int offset, int len) throws IOException {
+				if (buffer == null)
+					throw new NullPointerException();
+				else if (offset < 0 || len < 0 || len > buffer.length - offset)
+					throw new IndexOutOfBoundsException();
+				else if (len == 0)
+					return 0;
+				else
+					return readNextLine(buffer, offset, len);
+			}
+
+			private int readNextLine(byte[] buffer, int offset, int len)
+				throws IOException {
+				int c = read();
+				if (c == -1)
+					return -1;
+				buffer[offset] = (byte) c;
+
+				int i = 1;
+				for (; (i < len) && !isCompleteLineWritten(buffer, i - 1); ++i) {
+					byte read = (byte) read();
+					if (read == -1)
+						break;
+					else
+						buffer[offset + i] = read;
+				}
+				return i;
+			}
+
+			private boolean isCompleteLineWritten(byte[] buffer,
+												  int indexLastByteWritten) {
+				byte[] separator = getProperty("line.separator")
+					.getBytes(defaultCharset());
+				int indexFirstByteOfSeparator = indexLastByteWritten
+					- separator.length + 1;
+				return indexFirstByteOfSeparator >= 0
+					&& contains(buffer, separator, indexFirstByteOfSeparator);
+			}
+
+			private boolean contains(byte[] array, byte[] pattern, int indexStart) {
+				for (int i = 0; i < pattern.length; ++i)
+					if (array[indexStart + i] != pattern[i])
+						return false;
+				return true;
+			}
 		}
 	}
 }

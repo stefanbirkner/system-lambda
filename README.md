@@ -199,6 +199,71 @@ don't write anything to `System.err`/`System.out`:
       );
     }
 
+### System.in
+
+Interactive command-line applications read from `System.in`. If you write such
+applications you need to provide input to these applications. You can specify
+the lines that are available from `System.in` with the method
+`withTextFromSystemIn`
+
+    @Test
+	void readTextFromSystemIn() {
+	  withTextFromSystemIn("first line", "second line")
+	    .execute(() -> {
+	      Scanner scanner = new Scanner(System.in);
+	      scanner.nextLine();
+	      assertEquals("first line", scanner.nextLine());
+	    });
+	}
+
+For a complete test coverage you may also want to simulate `System.in` throwing
+exceptions when the application reads from it. You can specify such an
+exception (either `RuntimeException` or `IOException` after specifying the text.
+The exception will be thrown by the next `read` after the text has been
+consumed.
+
+    @Test
+	void readTextFromSystemInWithIOException() {
+	  withTextFromSystemIn("first line", "second line")
+	    .andExceptionThrownOnInputEnd(new IOException())
+	    .execute(() -> {
+	      Scanner scanner = new Scanner(System.in);
+	      scanner.nextLine();
+	      scanner.nextLine();
+	      assertThrownBy(
+	        IOException.class,
+          	() -> scanner.readLine()
+          );
+	    });
+	}
+
+    @Test
+	void readTextFromSystemInFailsWithRuntimeException() {
+	  withTextFromSystemIn("first line", "second line")
+	    .andExceptionThrownOnInputEnd(new RuntimeException())
+	    .execute(() -> {
+	      Scanner scanner = new Scanner(System.in);
+	      scanner.nextLine();
+	      scanner.nextLine();
+	      assertThrownBy(
+	        RuntimeException.class,
+          	() -> scanner.readLine()
+          );
+	    });
+	}
+
+You can write a test that throws an exception immediately by not providing any
+text.
+
+    withTextFromSystemIn()
+	    .andExceptionThrownOnInputEnd(...)
+	    .execute(() -> {
+	      Scanner scanner = new Scanner(System.in);
+	      assertThrownBy(
+	        ...,
+          	() -> scanner.readLine()
+          );
+	    });
 
 ## Contributing
 
