@@ -18,24 +18,26 @@ For JUnit 4 there is an alternative to Systen Lambda. Its name is
 System Lambda is available from
 [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.stefanbirkner%22%20AND%20a%3A%22system-lambda%22).
 
-    <dependency>
-      <groupId>com.github.stefanbirkner</groupId>
-      <artifactId>system-lambda</artifactId>
-      <version>not released</version>
-    </dependency>
+```xml
+<dependency>
+    <groupId>com.github.stefanbirkner</groupId>
+    <artifactId>system-lambda</artifactId>
+    <version>not released</version>
+</dependency>
+```
 
 Please don't forget to add the scope `test` if you're using System
 Lambda for tests only.
-
 
 ## Usage
 
 Import System Lambda's functions by adding
 
-    import static com.github.stefanbirkner.systemlambda.SystemLambda.*;
+```java
+import static com.github.stefanbirkner.systemlambda.SystemLambda.*;
+```
 
 to your tests.
-
 
 ### Security Manager
 
@@ -43,41 +45,43 @@ The function `withSecurityManager` lets you specify which `SecurityManager` is
 returned by `System.getSecurityManger()` while your code under test is
 executed.
 
-    @Test
-    void execute_code_with_specific_SecurityManager() {
-      SecurityManager securityManager = new ASecurityManager();
-      withSecurityManager(
+```java
+@Test
+void execute_code_with_specific_SecurityManager() {
+    SecurityManager securityManager = new ASecurityManager();
+    withSecurityManager(
+    securityManager,
+    () -> {
+        //code under test
+        //e.g. the following assertion is met
+        assertSame(
         securityManager,
-        () -> {
-          //code under test
-          //e.g. the following assertion is met
-          assertSame(
-            securityManager,
-            System.getSecurityManager()
-          );
-        }
-      );
+        System.getSecurityManager()
+        );
     }
+    );
+}
+```
 
 After the statement `withSecurityManager(...)` is executed
 `System.getSecurityManager()` will return the original security manager again.
-
 
 ### Environment Variables
 
 The method `withEnvironmentVariable` allows you to set environment variables
 within your test code that are removed after you code under test is executed.
 
-    @Test
-    void set_environment_variables() throws Exception {
-      withEnvironmentVariable("first", "first value")
-        .and("second", "second value")
-        .execute(() -> {
-          assertEquals("first value", System.getenv("first"));
-          assertEquals("second value", System.getenv("second"));
-        });
-	}
-
+```java
+@Test
+void set_environment_variables() throws Exception {
+    withEnvironmentVariable("first", "first value")
+    .and("second", "second value")
+    .execute(() -> {
+        assertEquals("first value", System.getenv("first"));
+        assertEquals("second value", System.getenv("second"));
+    });
+}
+```
 
 ### System Properties
 
@@ -86,19 +90,21 @@ code each System property has the same value like before. Therefore you
 can modify System properties inside of the test code without having an impact on
 other tests.
 
-    @Test
-    void execute_code_that_manipulates_system_properties() {
-      restoreSystemProperties(
-        () -> {
-          System.setProperty("some.property", "some value");
-          //code under test that reads properties (e.g. "some.property") or
-          //modifies them.
-        }
-      );
-      
-      //Here the value of "some.property" is the same like before.
-      //E.g. it is not set.
+```java
+@Test
+void execute_code_that_manipulates_system_properties() {
+    restoreSystemProperties(
+    () -> {
+        System.setProperty("some.property", "some value");
+        //code under test that reads properties (e.g. "some.property") or
+        //modifies them.
     }
+    );
+
+    //Here the value of "some.property" is the same like before.
+    //E.g. it is not set.
+}
+```
 
 ### System.in, System.out and System.err
 
@@ -110,70 +116,74 @@ applications you need to test the output of these applications. The methods
 line breaks to `\n` so that you can run tests with the same assertions on Linux,
 macOS and Windows.
 
-    @Test
-	void check_text_written_to_System_err(
-	) throws Exception {
-		String text = tapSystemErr(
-			() -> System.err.println("some text")
-		);
-		assertEquals(text, "some text");
-	}
+```java
+@Test
+void check_text_written_to_System_err(
+) throws Exception {
+    String text = tapSystemErr(
+        () -> System.err.println("some text")
+    );
+    assertEquals(text, "some text");
+}
 
-    @Test
-	void check_multiple_lines_written_to_System_err(
-	) throws Exception {
-		String text = tapSystemErrNormalized(
-			() -> {
-			    System.err.println("first line");
-			    System.err.println("second line");
-			}
-		);
-		assertEquals(text, "first line\nsecond line");
-	}
-    
-    @Test
-	void check_text_written_to_System_out(
-	) throws Exception {
-		String text = tapSystemOut(
-			() -> System.out.println("some text")
-		);
-		assertEquals(text, "some text");
-	}
+@Test
+void check_multiple_lines_written_to_System_err(
+) throws Exception {
+    String text = tapSystemErrNormalized(
+        () -> {
+            System.err.println("first line");
+            System.err.println("second line");
+        }
+    );
+    assertEquals(text, "first line\nsecond line");
+}
 
-    @Test
-	void check_multiple_lines_written_to_System_out(
-	) throws Exception {
-		String text = tapSystemOutNormalized(
-			() -> {
-			    System.out.println("first line");
-			    System.out.println("second line");
-			}
-		);
-		assertEquals(text, "first line\nsecond line");
-	}
+@Test
+void check_text_written_to_System_out(
+) throws Exception {
+    String text = tapSystemOut(
+        () -> System.out.println("some text")
+    );
+    assertEquals(text, "some text");
+}
+
+@Test
+void check_multiple_lines_written_to_System_out(
+) throws Exception {
+    String text = tapSystemOutNormalized(
+        () -> {
+            System.out.println("first line");
+            System.out.println("second line");
+        }
+    );
+    assertEquals(text, "first line\nsecond line");
+}
+```
 
 You can assert that nothing is written to `System.err`/`System.out` by wrapping
 code with the function
 `assertNothingWrittenToSystemErr`/`assertNothingWrittenToSystemOut`. E.g. the
 following tests fail:
 
-    @Test
-    void fails_because_something_is_written_to_System_err() {
-      assertNothingWrittenToSystemErr(
-        () -> {
-          System.err.println("some text");
-        }
-      );
+```java
+@Test
+void fails_because_something_is_written_to_System_err() {
+    assertNothingWrittenToSystemErr(
+    () -> {
+        System.err.println("some text");
     }
+    );
+}
 
-    @Test
-    void fails_because_something_is_written_to_System_out() {
-      assertNothingWrittenToSystemOut(
-        () -> {
-          System.out.println("some text");
-        }
-      );
+@Test
+void fails_because_something_is_written_to_System_out() {
+    assertNothingWrittenToSystemOut(
+    () -> {
+        System.out.println("some text");
     }
+    );
+}
+```
 
 If the code under test writes text to `System.err`/`System.out` then it is
 intermixed with the output of your build tool. Therefore you may want to avoid
@@ -181,24 +191,25 @@ that the code under test writes to `System.err`/`System.out`. You can achieve
 this with the function `muteSystemErr`/`muteSystemOut`. E.g. the following tests
 don't write anything to `System.err`/`System.out`:
 
-    @Test
-    void nothing_is_written_to_System_err() {
-      muteSystemErr(
-        () -> {
-          System.err.println("some text");
-        }
-      );
+```java
+@Test
+void nothing_is_written_to_System_err() {
+    muteSystemErr(
+    () -> {
+        System.err.println("some text");
     }
+    );
+}
 
-    @Test
-    void nothing_is_written_to_System_out() {
-      muteSystemOut(
-        () -> {
-          System.out.println("some text");
-        }
-      );
+@Test
+void nothing_is_written_to_System_out() {
+    muteSystemOut(
+    () -> {
+        System.out.println("some text");
     }
-
+    );
+}
+```
 
 ## Contributing
 
@@ -208,7 +219,6 @@ simply have a question about System Lambda.
 * [Write an issue.](https://github.com/stefanbirkner/system-lambda/issues/new)
 * Create a pull request. (See [Understanding the GitHub Flow](https://guides.github.com/introduction/flow/index.html))
 * [Write a mail to mail@stefan-birkner.de](mailto:mail@stefan-birkner.de)
-
 
 ## Development Guide
 
@@ -226,7 +236,6 @@ System Lambda supports [Travis CI](https://travis-ci.org/) (Linux) and
 [AppVeyor](http://www.appveyor.com/) (Windows) for continuous
 integration. Your pull request will be automatically build by both CI
 servers.
-
 
 ## Release Guide
 
