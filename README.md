@@ -16,11 +16,13 @@ For JUnit 4 there is an alternative to System Lambda. Its name is
 System Lambda is available from
 [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.stefanbirkner%22%20AND%20a%3A%22system-lambda%22).
 
-    <dependency>
-      <groupId>com.github.stefanbirkner</groupId>
-      <artifactId>system-lambda</artifactId>
-      <version>1.0.0</version>
-    </dependency>
+```xml
+<dependency>
+    <groupId>com.github.stefanbirkner</groupId>
+    <artifactId>system-lambda</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 
 Please don't forget to add the scope `test` if you're using System Lambda for
 tests only.
@@ -30,7 +32,9 @@ tests only.
 
 Import System Lambda's functions by adding
 
-    import static com.github.stefanbirkner.systemlambda.SystemLambda.*;
+```java
+import static com.github.stefanbirkner.systemlambda.SystemLambda.*;
+```
 
 to your tests.
 
@@ -43,14 +47,16 @@ when the application under test calls `System.exit`. You can avoid this with
 the method `catchSystemExit` which also returns the status code of the
 `System.exit` call.
 
-    @Test
-    void application_exits_with_status_42(
-    ) throws Exception {
-      int statusCode = catchSystemExit(() -> {
-        System.exit(42);
-      });
-      assertEquals(42, statusCode);
-    }
+```java
+@Test
+void application_exits_with_status_42(
+) throws Exception {
+  int statusCode = catchSystemExit(() -> {
+    System.exit(42);
+  });
+  assertEquals(42, statusCode);
+}
+```
 
 The method `catchSystemExit` throws an `AssertionError` if the code under test
 does not call `System.exit`. Therefore your test fails with the failure message
@@ -62,16 +68,18 @@ does not call `System.exit`. Therefore your test fails with the failure message
 The method `withEnvironmentVariable` allows you to set environment variables
 within your test code that are removed after your code under test is executed.
 
-    @Test
-    void execute_code_with_environment_variables(
-    ) throws Exception {
-      withEnvironmentVariable("first", "first value")
-        .and("second", "second value")
-        .execute(() -> {
-          assertEquals("first value", System.getenv("first"));
-          assertEquals("second value", System.getenv("second"));
-        });
-	}
+```java
+@Test
+void execute_code_with_environment_variables(
+) throws Exception {
+  withEnvironmentVariable("first", "first value")
+    .and("second", "second value")
+    .execute(() -> {
+      assertEquals("first value", System.getenv("first"));
+      assertEquals("second value", System.getenv("second"));
+    });
+}
+```
 
 
 ### System Properties
@@ -81,18 +89,20 @@ code each System property has the same value like before. Therefore you can
 modify System properties inside of the test code without having an impact on
 other tests.
 
-    @Test
-    void execute_code_that_manipulates_system_properties(
-    ) throws Exception {
-      restoreSystemProperties(() -> {
-        System.setProperty("some.property", "some value");
-        //code under test that reads properties (e.g. "some.property") or
-        //modifies them.
-      });
-      
-      //Here the value of "some.property" is the same like before.
-      //E.g. it is not set.
-    }
+```java
+@Test
+void execute_code_that_manipulates_system_properties(
+) throws Exception {
+  restoreSystemProperties(() -> {
+    System.setProperty("some.property", "some value");
+    //code under test that reads properties (e.g. "some.property") or
+    //modifies them.
+  });
+  
+  //Here the value of "some.property" is the same like before.
+  //E.g. it is not set.
+}
+```
 
      
 ### System.out and System.err
@@ -105,64 +115,68 @@ applications you need to test the output of these applications. The methods
 line breaks to `\n` so that you can run tests with the same assertions on
 different operating systems.
 
-    @Test
-    void application_writes_text_to_System_err(
-    ) throws Exception {
-      String text = tapSystemErr(() -> {
-        System.err.println("some text");
-      });
-      assertEquals("some text", text);
-    }
-    
-    @Test
-    void application_writes_mutliple_lines_to_System_err(
-    ) throws Exception {
-      String text = tapSystemErrNormalized(() -> {
-        System.err.println("first line");
-        System.err.println("second line");
-      });
-      assertEquals("first line\nsecond line", text);
-    }
-    
-    @Test
-    void application_writes_text_to_System_out(
-    ) throws Exception {
-      String text = tapSystemOut(() -> {
-        System.out.println("some text");
-      });
-      assertEquals("some text", text);
-    }
+```java
+@Test
+void application_writes_text_to_System_err(
+) throws Exception {
+  String text = tapSystemErr(() -> {
+    System.err.println("some text");
+  });
+  assertEquals("some text", text);
+}
 
-    @Test
-    void application_writes_mutliple_lines_to_System_out(
-    ) throws Exception {
-      String text = tapSystemOutNormalized(() -> {
-        System.out.println("first line");
-        System.out.println("second line");
-      });
-      assertEquals("first line\nsecond line", text);
-    }
+@Test
+void application_writes_mutliple_lines_to_System_err(
+) throws Exception {
+  String text = tapSystemErrNormalized(() -> {
+    System.err.println("first line");
+    System.err.println("second line");
+  });
+  assertEquals("first line\nsecond line", text);
+}
+
+@Test
+void application_writes_text_to_System_out(
+) throws Exception {
+  String text = tapSystemOut(() -> {
+    System.out.println("some text");
+  });
+  assertEquals("some text", text);
+}
+
+@Test
+void application_writes_mutliple_lines_to_System_out(
+) throws Exception {
+  String text = tapSystemOutNormalized(() -> {
+    System.out.println("first line");
+    System.out.println("second line");
+  });
+  assertEquals("first line\nsecond line", text);
+}
+```
 
 You can assert that nothing is written to `System.err`/`System.out` by wrapping
 code with the function
 `assertNothingWrittenToSystemErr`/`assertNothingWrittenToSystemOut`. E.g. the
 following tests fail:
 
-    @Test
-    void fails_because_something_is_written_to_System_err(
-    ) throws Exception {
-      assertNothingWrittenToSystemErr(() -> {
-        System.err.println("some text");
-      });
-    }
-    
-    @Test
-    void fails_because_something_is_written_to_System_out(
-    ) throws Exception {
-      assertNothingWrittenToSystemOut(() -> {
-        System.out.println("some text");
-      });
-    }
+```java
+@Test
+void fails_because_something_is_written_to_System_err(
+) throws Exception {
+  assertNothingWrittenToSystemErr(() -> {
+    System.err.println("some text");
+  });
+}
+
+@Test
+void fails_because_something_is_written_to_System_out(
+) throws Exception {
+  assertNothingWrittenToSystemOut(() -> {
+    System.out.println("some text");
+  });
+}
+```
 
 If the code under test writes text to `System.err`/`System.out` then it is
 intermixed with the output of your build tool. Therefore you may want to avoid
@@ -170,21 +184,23 @@ that the code under test writes to `System.err`/`System.out`. You can achieve
 this with the function `muteSystemErr`/`muteSystemOut`. E.g. the following tests
 don't write anything to `System.err`/`System.out`:
 
-    @Test
-    void nothing_is_written_to_System_err(
-    ) throws Exception {
-      muteSystemErr(() -> {
-        System.err.println("some text");
-      });
-    }
-    
-    @Test
-    void nothing_is_written_to_System_out(
-    ) throws Exception {
-      muteSystemOut(() -> {
-        System.out.println("some text");
-      });
-    }
+```java
+@Test
+void nothing_is_written_to_System_err(
+) throws Exception {
+  muteSystemErr(() -> {
+    System.err.println("some text");
+  });
+}
+
+@Test
+void nothing_is_written_to_System_out(
+) throws Exception {
+  muteSystemOut(() -> {
+    System.out.println("some text");
+  });
+}
+```
 
 ### System.in
 
@@ -193,16 +209,18 @@ applications you need to provide input to these applications. You can specify
 the lines that are available from `System.in` with the method
 `withTextFromSystemIn`
 
-    @Test
-    void Scanner_reads_text_from_System_in(
-    ) throws Exception {
-      withTextFromSystemIn("first line", "second line")
-        .execute(() -> {
-          Scanner scanner = new Scanner(System.in);
-          scanner.nextLine();
-          assertEquals("second line", scanner.nextLine());
-        });
-    }
+```java
+@Test
+void Scanner_reads_text_from_System_in(
+) throws Exception {
+  withTextFromSystemIn("first line", "second line")
+    .execute(() -> {
+      Scanner scanner = new Scanner(System.in);
+      scanner.nextLine();
+      assertEquals("second line", scanner.nextLine());
+    });
+}
+```
 
 For a complete test coverage you may also want to simulate `System.in` throwing
 exceptions when the application reads from it. You can specify such an
@@ -210,50 +228,54 @@ exception (either `RuntimeException` or `IOException`) after specifying the
 text. The exception will be thrown by the next `read` after the text has been
 consumed.
 
-    @Test
-    void System_in_throws_IOException(
-    ) throws Exception {
-      withTextFromSystemIn("first line", "second line")
-        .andExceptionThrownOnInputEnd(new IOException())
-        .execute(() -> {
-          Scanner scanner = new Scanner(System.in);
-          scanner.nextLine();
-          scanner.nextLine();
-          assertThrownBy(
-            IOException.class,
-            () -> scanner.readLine()
-          );
-      });
-    }
-    
-    @Test
-    void System_in_throws_RuntimeException(
-    ) throws Exception {
-      withTextFromSystemIn("first line", "second line")
-        .andExceptionThrownOnInputEnd(new RuntimeException())
-        .execute(() -> {
-          Scanner scanner = new Scanner(System.in);
-          scanner.nextLine();
-          scanner.nextLine();
-          assertThrownBy(
-            RuntimeException.class,
-            () -> scanner.readLine()
-          );
-        });
-    }
+```java
+@Test
+void System_in_throws_IOException(
+) throws Exception {
+  withTextFromSystemIn("first line", "second line")
+    .andExceptionThrownOnInputEnd(new IOException())
+    .execute(() -> {
+      Scanner scanner = new Scanner(System.in);
+      scanner.nextLine();
+      scanner.nextLine();
+      assertThrownBy(
+        IOException.class,
+        () -> scanner.readLine()
+      );
+  });
+}
+
+@Test
+void System_in_throws_RuntimeException(
+) throws Exception {
+  withTextFromSystemIn("first line", "second line")
+    .andExceptionThrownOnInputEnd(new RuntimeException())
+    .execute(() -> {
+      Scanner scanner = new Scanner(System.in);
+      scanner.nextLine();
+      scanner.nextLine();
+      assertThrownBy(
+        RuntimeException.class,
+        () -> scanner.readLine()
+      );
+    });
+}
+```
 
 You can write a test that throws an exception immediately by not providing any
 text.
 
-    withTextFromSystemIn()
-      .andExceptionThrownOnInputEnd(...)
-      .execute(() -> {
-        Scanner scanner = new Scanner(System.in);
-        assertThrownBy(
-          ...,
-          () -> scanner.readLine()
-        );
-      });
+```java
+withTextFromSystemIn()
+  .andExceptionThrownOnInputEnd(...)
+  .execute(() -> {
+    Scanner scanner = new Scanner(System.in);
+    assertThrownBy(
+      ...,
+      () -> scanner.readLine()
+    );
+  });
+```
 
 ### Security Manager
 
@@ -261,22 +283,24 @@ The function `withSecurityManager` lets you specify the `SecurityManager` that
 is returned by `System.getSecurityManger()` while your code under test is
 executed.
 
-    @Test
-    void execute_code_with_specific_SecurityManager(
-    ) throws Exception {
-      SecurityManager securityManager = new ASecurityManager();
-      withSecurityManager(
+```java
+@Test
+void execute_code_with_specific_SecurityManager(
+) throws Exception {
+  SecurityManager securityManager = new ASecurityManager();
+  withSecurityManager(
+    securityManager,
+    () -> {
+      //code under test
+      //e.g. the following assertion is met
+      assertSame(
         securityManager,
-        () -> {
-          //code under test
-          //e.g. the following assertion is met
-          assertSame(
-            securityManager,
-            System.getSecurityManager()
-          );
-        }
+        System.getSecurityManager()
       );
     }
+  );
+}
+```
 
 After `withSecurityManager(...)` is executed`System.getSecurityManager()`
 returns the original security manager again.
