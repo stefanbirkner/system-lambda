@@ -18,6 +18,17 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 @DisplayNameGeneration(ReplaceUnderscores.class)
 class WithEnvironmentVariableTest {
+	@Test
+	void statement_is_executed(
+	) throws Exception {
+		StatementMock statementMock = new StatementMock();
+
+		withEnvironmentVariable("dummy name", "dummy value")
+			.execute(statementMock);
+
+		assertThat(statementMock.hasBeenEvaluated).isTrue();
+	}
+
 	@Nested
 	class environment_variable_that_is_set_to_some_value {
 		@Test
