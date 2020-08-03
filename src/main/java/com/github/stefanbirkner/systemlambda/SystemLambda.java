@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.security.Permission;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 import static java.lang.Class.forName;
 import static java.lang.System.*;
@@ -50,12 +51,16 @@ import static java.util.stream.Collectors.joining;
  * &#064;Test
  * void execute_code_with_environment_variables(
  * ) throws Exception {
- *   withEnvironmentVariable("first", "first value")
+ *  {@literal List<String>} values = withEnvironmentVariable("first", "first value")
  *     .and("second", "second value")
- *     .execute((){@literal ->} {
- *       assertEquals("first value", System.getenv("first"));
- *       assertEquals("second value", System.getenv("second"));
- *     });
+ *     .execute((){@literal ->} asList(
+ *       System.getenv("first"),
+ *       System.getenv("second")
+ *     ));
+ *   assertEquals(
+ *     asList("first value", "second value"),
+ *     values
+ *   );
  * }</pre>
  *
  * <h2>System Properties</h2>
@@ -612,22 +617,18 @@ public class SystemLambda {
 	 * &#064;Test
 	 * void execute_code_with_environment_variables(
 	 * ) throws Exception {
-	 *   withEnvironmentVariable("first", "first value")
+	 *   {@literal List<String>} values = withEnvironmentVariable("first", "first value")
 	 *     .and("second", "second value")
 	 *     .and("third", null)
-	 *     .execute((){@literal ->} {
-	 *       assertEquals(
-	 *         "first value",
-	 *         System.getenv("first")
-	 *       );
-	 *       assertEquals(
-	 *         "second value",
-	 *         System.getenv("second")
-	 *       );
-	 *       assertNull(
+	 *     .execute((){@literal ->} asList(
+	 *         System.getenv("first"),
+	 *         System.getenv("second"),
 	 *         System.getenv("third")
-	 *       );
-	 *     });
+	 *     ));
+	 *   assertEquals(
+	 *     asList("first value", "second value", null),
+	 *     values
+	 *   );
 	 * }
 	 * </pre>
 	 * <p>You cannot specify the value of an an environment variable twice. An
@@ -642,6 +643,7 @@ public class SystemLambda {
 	 * variables.
 	 * @since 1.0.0
 	 * @see WithEnvironmentVariables#and(String, String)
+	 * @see WithEnvironmentVariables#execute(Callable)
 	 * @see WithEnvironmentVariables#execute(Statement)
 	 */
 	public static WithEnvironmentVariables withEnvironmentVariable(
@@ -1081,6 +1083,53 @@ public class SystemLambda {
 		}
 
 		/**
+		 * Executes a {@code Callable} with environment variable values
+		 * according to what was set before. It exposes the return value of the
+		 * {@code Callable}. All changes to environment variables are reverted
+		 * after the {@code Callable} has been executed.
+		 * <pre>
+		 * &#064;Test
+		 * void execute_code_with_environment_variables(
+		 * ) throws Exception {
+		 *   {@literal List<String>} values = withEnvironmentVariable("first", "first value")
+		 *     .and("second", "second value")
+		 *     .and("third", null)
+		 *     .execute((){@literal ->} asList(
+		 *         System.getenv("first"),
+		 *         System.getenv("second"),
+		 *         System.getenv("third")
+		 *     ));
+		 *   assertEquals(
+		 *     asList("first value", "second value", null),
+		 *     values
+		 *   );
+		 * }
+		 * </pre>
+		 * <p><b>Warning:</b> This method uses reflection for modifying internals of the
+		 * environment variables map. It fails if your {@code SecurityManager} forbids
+		 * such modifications.
+		 * @param <T> the type of {@code callable}'s result
+		 * @param callable an arbitrary piece of code.
+		 * @return the return value of {@code callable}.
+		 * @throws Exception any exception thrown by the callable.
+		 * @since 1.1.0
+		 * @see #withEnvironmentVariable(String, String)
+		 * @see #and(String, String)
+		 * @see #execute(Statement)
+		 */
+		public <T> T execute(
+			Callable<T> callable
+		) throws Exception {
+			Map<String, String> originalVariables = new HashMap<>(getenv());
+			try {
+				setEnvironmentVariables();
+				return callable.call();
+			} finally {
+				restoreOriginalVariables(originalVariables);
+			}
+		}
+
+		/**
 		 * Executes a statement with environment variable values according to
 		 * what was set before. All changes to environment variables are
 		 * reverted after the statement has been executed.
@@ -1114,6 +1163,7 @@ public class SystemLambda {
 		 * @since 1.0.0
 		 * @see #withEnvironmentVariable(String, String)
 		 * @see WithEnvironmentVariables#and(String, String)
+		 * @see #execute(Callable)
 		 */
     	public void execute(
     		Statement statement

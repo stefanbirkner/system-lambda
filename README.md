@@ -20,7 +20,7 @@ System Lambda is available from
 <dependency>
     <groupId>com.github.stefanbirkner</groupId>
     <artifactId>system-lambda</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -72,12 +72,16 @@ within your test code that are removed after your code under test is executed.
 @Test
 void execute_code_with_environment_variables(
 ) throws Exception {
-  withEnvironmentVariable("first", "first value")
+  List<String> values = withEnvironmentVariable("first", "first value")
     .and("second", "second value")
-    .execute(() -> {
-      assertEquals("first value", System.getenv("first"));
-      assertEquals("second value", System.getenv("second"));
-    });
+    .execute(() -> asList(
+      System.getenv("first"),
+      System.getenv("second")
+    ));
+  assertEquals(
+    asList("first value", "second value"),
+    values
+  );
 }
 ```
 
