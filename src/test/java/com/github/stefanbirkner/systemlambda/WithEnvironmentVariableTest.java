@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
 import static java.lang.System.getenv;
@@ -247,15 +246,14 @@ class WithEnvironmentVariableTest {
 		void after_callable_throws_exception() {
 			Map<String, String> originalEnvironmentVariables
 				= new HashMap<>(getenv());
+			FailingCallableMock failingCallable = new FailingCallableMock();
 
 			Throwable error = catchThrowable(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute((Callable<String>) () -> {
-						throw new RuntimeException("dummy exception");
-					})
+					.execute(failingCallable)
 			);
 
-			assertThat(error).hasMessage("dummy exception");
+			assertThat(error).isEqualTo(failingCallable.exception);
 			assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
 		}
 
@@ -263,15 +261,14 @@ class WithEnvironmentVariableTest {
 		void after_statement_throws_exception() {
 			Map<String, String> originalEnvironmentVariables
 				= new HashMap<>(getenv());
+			FailingStatementMock failingStatement = new FailingStatementMock();
 
 			Throwable error = catchThrowable(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(() -> {
-						throw new RuntimeException("dummy exception"); }
-					)
+					.execute(failingStatement)
 			);
 
-			assertThat(error).hasMessage("dummy exception");
+			assertThat(error).isEqualTo(failingStatement.exception);
 			assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
 		}
 	}
@@ -304,31 +301,28 @@ class WithEnvironmentVariableTest {
 		@Test
 		void after_callable_throws_exception() {
 			String originalValue = getenv("dummy name");
+			FailingCallableMock failingCallable = new FailingCallableMock();
 
 			Throwable error = catchThrowable(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute((Callable<String>) () -> {
-						throw new RuntimeException("dummy exception");
-					})
+					.execute(failingCallable)
 			);
 
-			assertThat(error).hasMessage("dummy exception");
+			assertThat(error).isEqualTo(failingCallable.exception);
 			assertThat(getenv("dummy name")).isEqualTo(originalValue);
 		}
 
 		@Test
 		void after_statement_throws_exception() {
 			String originalValue = getenv("dummy name");
+			FailingStatementMock failingStatement = new FailingStatementMock();
 
 			Throwable error = catchThrowable(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(() -> {
-							throw new RuntimeException("dummy exception");
-						}
-					)
+					.execute(failingStatement)
 			);
 
-			assertThat(error).hasMessage("dummy exception");
+			assertThat(error).isEqualTo(failingStatement.exception);
 			assertThat(getenv("dummy name")).isEqualTo(originalValue);
 		}
 	}
