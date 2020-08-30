@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>system-lambda</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>System Lambda</name>
@@ -67,6 +67,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M5</version>
         <configuration>
           <forkCount>1</forkCount>
           <reuseForks>false</reuseForks>
