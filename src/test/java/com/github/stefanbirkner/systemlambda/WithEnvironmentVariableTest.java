@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.github.stefanbirkner.fishbowl.Fishbowl.ignoreException;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
 import static java.lang.System.getenv;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -246,16 +247,12 @@ class WithEnvironmentVariableTest {
 		void after_callable_throws_exception() {
 			Map<String, String> originalEnvironmentVariables
 				= new HashMap<>(getenv());
-			FailingCallableMock failingCallable = new FailingCallableMock();
 
-			Throwable error = catchThrowable(
+			ignoreException(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(failingCallable)
+					.execute(new FailingCallableMock())
 			);
 
-			assertThat(error)
-					.isInstanceOf(SystemLambdaExecutionException.class)
-					.hasCause(failingCallable.exception);
 			assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
 		}
 
@@ -263,16 +260,12 @@ class WithEnvironmentVariableTest {
 		void after_statement_throws_exception() {
 			Map<String, String> originalEnvironmentVariables
 				= new HashMap<>(getenv());
-			FailingStatementMock failingStatement = new FailingStatementMock();
 
-			Throwable error = catchThrowable(
+			ignoreException(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(failingStatement)
+					.execute(new FailingStatementMock())
 			);
 
-			assertThat(error)
-					.isInstanceOf(SystemLambdaExecutionException.class)
-					.hasCause(failingStatement.exception);
 			assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
 		}
 	}
@@ -305,33 +298,56 @@ class WithEnvironmentVariableTest {
 		@Test
 		void after_callable_throws_exception() {
 			String originalValue = getenv("dummy name");
-			FailingCallableMock failingCallable = new FailingCallableMock();
 
-			Throwable error = catchThrowable(
+			ignoreException(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(failingCallable)
+					.execute(new FailingCallableMock())
 			);
 
-			assertThat(error)
-					.isInstanceOf(SystemLambdaExecutionException.class)
-					.hasCause(failingCallable.exception);
 			assertThat(getenv("dummy name")).isEqualTo(originalValue);
 		}
 
 		@Test
 		void after_statement_throws_exception() {
 			String originalValue = getenv("dummy name");
+
+			ignoreException(
+				() -> withEnvironmentVariable("dummy name", randomValue())
+					.execute(new FailingStatementMock())
+			);
+
+			assertThat(getenv("dummy name")).isEqualTo(originalValue);
+		}
+	}
+
+	@Nested
+	class should_wrap_exceptions {
+		@Test
+		void when_callable_throws_exception() {
+			FailingCallableMock failingCallable = new FailingCallableMock();
+
+			Throwable error = catchThrowable(
+					() -> withEnvironmentVariable("dummy name", randomValue())
+							.execute(failingCallable)
+			);
+
+			assertThat(error)
+					.isInstanceOf(SystemLambdaExecutionException.class)
+					.hasCause(failingCallable.exception);
+		}
+
+		@Test
+		void when_statement_throws_exception() {
 			FailingStatementMock failingStatement = new FailingStatementMock();
 
 			Throwable error = catchThrowable(
-				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(failingStatement)
+					() -> withEnvironmentVariable("dummy name", randomValue())
+							.execute(failingStatement)
 			);
 
 			assertThat(error)
 					.isInstanceOf(SystemLambdaExecutionException.class)
 					.hasCause(failingStatement.exception);
-			assertThat(getenv("dummy name")).isEqualTo(originalValue);
 		}
 	}
 
