@@ -1111,7 +1111,6 @@ public class SystemLambda {
 		 * @param <T> the type of {@code callable}'s result
 		 * @param callable an arbitrary piece of code.
 		 * @return the return value of {@code callable}.
-		 * @throws Exception any exception thrown by the callable.
 		 * @since 1.1.0
 		 * @see #withEnvironmentVariable(String, String)
 		 * @see #and(String, String)
@@ -1119,11 +1118,13 @@ public class SystemLambda {
 		 */
 		public <T> T execute(
 			Callable<T> callable
-		) throws Exception {
+		) {
 			Map<String, String> originalVariables = new HashMap<>(getenv());
 			try {
 				setEnvironmentVariables();
 				return callable.call();
+			} catch (Exception e) {
+				throw new SystemLambdaExecutionException(e);
 			} finally {
 				restoreOriginalVariables(originalVariables);
 			}
@@ -1159,7 +1160,6 @@ public class SystemLambda {
 		 * environment variables map. It fails if your {@code SecurityManager} forbids
 		 * such modifications.
 		 * @param statement an arbitrary piece of code.
-		 * @throws Exception any exception thrown by the statement.
 		 * @since 1.0.0
 		 * @see #withEnvironmentVariable(String, String)
 		 * @see WithEnvironmentVariables#and(String, String)
@@ -1167,11 +1167,13 @@ public class SystemLambda {
 		 */
     	public void execute(
     		Statement statement
-		) throws Exception {
+		) {
     		Map<String, String> originalVariables = new HashMap<>(getenv());
     		try {
 				setEnvironmentVariables();
 				statement.execute();
+			} catch (Exception e) {
+    			throw new SystemLambdaExecutionException(e);
 			} finally {
 				restoreOriginalVariables(originalVariables);
 			}

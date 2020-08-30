@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 class WithEnvironmentVariableTest {
 	@Test
 	void callable_is_executed(
-	) throws Exception {
+	) {
 		CallableMock callable = new CallableMock();
 		withEnvironmentVariable("dummy name", "dummy value")
 			.execute(callable);
@@ -29,7 +29,7 @@ class WithEnvironmentVariableTest {
 
 	@Test
 	void return_value_of_callable_is_exposed(
-	) throws Exception {
+	) {
 		String value = withEnvironmentVariable("dummy name", "dummy value")
 			.execute(() -> "return value");
 
@@ -38,7 +38,7 @@ class WithEnvironmentVariableTest {
 
 	@Test
 	void statement_is_executed(
-	) throws Exception {
+	) {
 		StatementMock statementMock = new StatementMock();
 
 		withEnvironmentVariable("dummy name", "dummy value")
@@ -51,7 +51,7 @@ class WithEnvironmentVariableTest {
 	class environment_variable_that_is_set_to_some_value {
 		@Test
 		void is_available_in_the_callable(
-		) throws Exception {
+		) {
 			withEnvironmentVariable("dummy name", "dummy value")
 				.execute(() -> {
 					assertThat(getenv("dummy name")).isEqualTo("dummy value");
@@ -61,7 +61,7 @@ class WithEnvironmentVariableTest {
 
 		@Test
 		void is_available_in_the_statement(
-		) throws Exception {
+		) {
 			withEnvironmentVariable("dummy name", "dummy value")
 				.execute(() ->
 					assertThat(getenv("dummy name")).isEqualTo("dummy value")
@@ -70,7 +70,7 @@ class WithEnvironmentVariableTest {
 
 		@Test
 		void is_available_in_the_callable_from_environment_variables_map(
-		) throws Exception {
+		) {
 			withEnvironmentVariable("dummy name", "dummy value")
 				.execute(() -> {
 					assertThat(getenv()).containsEntry("dummy name", "dummy value");
@@ -80,7 +80,7 @@ class WithEnvironmentVariableTest {
 
 		@Test
 		void is_available_in_the_statement_from_environment_variables_map(
-		) throws Exception {
+		) {
 			withEnvironmentVariable("dummy name", "dummy value")
 				.execute(() ->
 					assertThat(getenv()).containsEntry("dummy name", "dummy value")
@@ -92,7 +92,7 @@ class WithEnvironmentVariableTest {
 	class multiple_environment_variable_that_are_set_to_some_value {
 		@Test
 		void are_available_in_the_callable(
-		) throws Exception {
+		) {
 			withEnvironmentVariable("first", "first value")
 				.and("second", "second value")
 				.execute(() -> {
@@ -104,7 +104,7 @@ class WithEnvironmentVariableTest {
 
 		@Test
 		void are_available_in_the_statement(
-		) throws Exception {
+		) {
 			withEnvironmentVariable("first", "first value")
 				.and("second", "second value")
 				.execute(() -> {
@@ -118,7 +118,7 @@ class WithEnvironmentVariableTest {
 	class environment_variable_that_is_set_to_null {
 		@Test
 		void is_null_in_the_callable(
-		) throws Exception {
+		) {
 			//we need to set a value because it is null by default
 			withEnvironmentVariable("dummy name", randomValue())
 				.execute(() ->
@@ -132,7 +132,7 @@ class WithEnvironmentVariableTest {
 
 		@Test
 		void is_null_in_the_statement(
-		) throws Exception {
+		) {
 			//we need to set a value because it is null by default
 			withEnvironmentVariable("dummy name", randomValue())
 				.execute(() ->
@@ -143,7 +143,7 @@ class WithEnvironmentVariableTest {
 
 		@Test
 		void is_not_stored_in_the_environment_variables_map_in_the_callable(
-		) throws Exception {
+		) {
 			//we need to set a value because it is null by default
 			withEnvironmentVariable("dummy name", randomValue())
 				.execute(() ->
@@ -157,7 +157,7 @@ class WithEnvironmentVariableTest {
 
 		@Test
 		void is_not_stored_in_the_environment_variables_map_in_the_statement(
-		) throws Exception {
+		) {
 			//we need to set a value because it is null by default
 			withEnvironmentVariable("dummy name", randomValue())
 				.execute(() ->
@@ -202,7 +202,7 @@ class WithEnvironmentVariableTest {
 
 	@Test
 	void the_and_method_creates_a_new_object_so_that_EnvironmentVariables_object_can_be_reused(
-	) throws Exception {
+	) {
 		WithEnvironmentVariables baseSetting = withEnvironmentVariable("first", "first value");
 		baseSetting.and("second", "second value")
 			.execute(() -> {});
@@ -219,7 +219,7 @@ class WithEnvironmentVariableTest {
 	class environment_variables_map_contains_same_values_as_before {
 		@Test
 		void after_callable_is_executed(
-		) throws Exception {
+		) {
 			Map<String, String> originalEnvironmentVariables
 				= new HashMap<>(getenv());
 
@@ -231,7 +231,7 @@ class WithEnvironmentVariableTest {
 
 		@Test
 		void after_statement_is_executed(
-		) throws Exception {
+		) {
 			Map<String, String> originalEnvironmentVariables
 				= new HashMap<>(getenv());
 
@@ -253,7 +253,9 @@ class WithEnvironmentVariableTest {
 					.execute(failingCallable)
 			);
 
-			assertThat(error).isEqualTo(failingCallable.exception);
+			assertThat(error)
+					.isInstanceOf(SystemLambdaExecutionException.class)
+					.hasCause(failingCallable.exception);
 			assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
 		}
 
@@ -268,7 +270,9 @@ class WithEnvironmentVariableTest {
 					.execute(failingStatement)
 			);
 
-			assertThat(error).isEqualTo(failingStatement.exception);
+			assertThat(error)
+					.isInstanceOf(SystemLambdaExecutionException.class)
+					.hasCause(failingStatement.exception);
 			assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
 		}
 	}
@@ -277,7 +281,7 @@ class WithEnvironmentVariableTest {
 	class environment_variables_are_the_same_as_before {
 		@Test
 		void after_callable_is_executed(
-		) throws Exception {
+		) {
 			String originalValue = getenv("dummy name");
 
 			withEnvironmentVariable("dummy name", randomValue())
@@ -288,7 +292,7 @@ class WithEnvironmentVariableTest {
 
 		@Test
 		void after_statement_is_executed(
-		) throws Exception {
+		) {
 			String originalValue = getenv("dummy name");
 
 			withEnvironmentVariable("dummy name", randomValue())
@@ -308,7 +312,9 @@ class WithEnvironmentVariableTest {
 					.execute(failingCallable)
 			);
 
-			assertThat(error).isEqualTo(failingCallable.exception);
+			assertThat(error)
+					.isInstanceOf(SystemLambdaExecutionException.class)
+					.hasCause(failingCallable.exception);
 			assertThat(getenv("dummy name")).isEqualTo(originalValue);
 		}
 
@@ -322,7 +328,9 @@ class WithEnvironmentVariableTest {
 					.execute(failingStatement)
 			);
 
-			assertThat(error).isEqualTo(failingStatement.exception);
+			assertThat(error)
+					.isInstanceOf(SystemLambdaExecutionException.class)
+					.hasCause(failingStatement.exception);
 			assertThat(getenv("dummy name")).isEqualTo(originalValue);
 		}
 	}
