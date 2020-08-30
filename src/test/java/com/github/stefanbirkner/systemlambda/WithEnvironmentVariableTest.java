@@ -251,7 +251,7 @@ class WithEnvironmentVariableTest {
 
 			ignoreException(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(() -> (Callable<String>) () -> {
+					.execute((Callable<String>) () -> {
 						throw new RuntimeException("dummy exception");
 					})
 			);
@@ -306,7 +306,7 @@ class WithEnvironmentVariableTest {
 
 			ignoreException(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(() -> (Callable<String>) () -> {
+					.execute((Callable<String>) () -> {
 						throw new RuntimeException("dummy exception");
 					})
 			);
