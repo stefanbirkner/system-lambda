@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static com.github.stefanbirkner.fishbowl.Fishbowl.ignoreException;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
 import static java.lang.System.getenv;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -251,7 +250,7 @@ class WithEnvironmentVariableTest {
 
 			Throwable error = catchThrowable(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(() -> (Callable<String>) () -> {
+					.execute((Callable<String>) () -> {
 						throw new RuntimeException("dummy exception");
 					})
 			);
@@ -308,7 +307,7 @@ class WithEnvironmentVariableTest {
 
 			Throwable error = catchThrowable(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(() -> (Callable<String>) () -> {
+					.execute((Callable<String>) () -> {
 						throw new RuntimeException("dummy exception");
 					})
 			);
