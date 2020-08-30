@@ -249,13 +249,14 @@ class WithEnvironmentVariableTest {
 			Map<String, String> originalEnvironmentVariables
 				= new HashMap<>(getenv());
 
-			ignoreException(
+			Throwable error = catchThrowable(
 				() -> withEnvironmentVariable("dummy name", randomValue())
 					.execute(() -> (Callable<String>) () -> {
 						throw new RuntimeException("dummy exception");
 					})
 			);
 
+			assertThat(error).hasMessage("dummy exception");
 			assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
 		}
 
@@ -264,13 +265,14 @@ class WithEnvironmentVariableTest {
 			Map<String, String> originalEnvironmentVariables
 				= new HashMap<>(getenv());
 
-			ignoreException(
+			Throwable error = catchThrowable(
 				() -> withEnvironmentVariable("dummy name", randomValue())
 					.execute(() -> {
 						throw new RuntimeException("dummy exception"); }
 					)
 			);
 
+			assertThat(error).hasMessage("dummy exception");
 			assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
 		}
 	}
@@ -304,13 +306,14 @@ class WithEnvironmentVariableTest {
 		void after_callable_throws_exception() {
 			String originalValue = getenv("dummy name");
 
-			ignoreException(
+			Throwable error = catchThrowable(
 				() -> withEnvironmentVariable("dummy name", randomValue())
 					.execute(() -> (Callable<String>) () -> {
 						throw new RuntimeException("dummy exception");
 					})
 			);
 
+			assertThat(error).hasMessage("dummy exception");
 			assertThat(getenv("dummy name")).isEqualTo(originalValue);
 		}
 
@@ -318,7 +321,7 @@ class WithEnvironmentVariableTest {
 		void after_statement_throws_exception() {
 			String originalValue = getenv("dummy name");
 
-			ignoreException(
+			Throwable error = catchThrowable(
 				() -> withEnvironmentVariable("dummy name", randomValue())
 					.execute(() -> {
 							throw new RuntimeException("dummy exception");
@@ -326,6 +329,7 @@ class WithEnvironmentVariableTest {
 					)
 			);
 
+			assertThat(error).hasMessage("dummy exception");
 			assertThat(getenv("dummy name")).isEqualTo(originalValue);
 		}
 	}
