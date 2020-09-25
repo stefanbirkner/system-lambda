@@ -5,12 +5,9 @@ import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.PrintStream;
-
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOutNormalized;
 import static java.lang.System.out;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 
 @DisplayNameGeneration(ReplaceUnderscores.class)
 class TapSystemOutNormalizedTest {
@@ -38,32 +35,11 @@ class TapSystemOutNormalizedTest {
 	}
 
 	@Nested
-	class System_out_is_same_as_before {
-		@Test
-		void after_statement_is_executed(
-		) throws Exception {
-			PrintStream originalOut = out;
-
-			tapSystemOutNormalized(
-				() -> out.println("some text")
-			);
-
-			assertThat(out).isSameAs(originalOut);
-		}
-
-		@Test
-		void after_statement_throws_exception() {
-			PrintStream originalOut = out;
-
-			catchThrowable(
-				() -> tapSystemOutNormalized(
-					() -> {
-						throw new Exception("some exception");
-					}
-				)
-			);
-
-			assertThat(out).isSameAs(originalOut);
+	class System_out_is_same_as_before
+		extends RestoreSystemOutChecks
+	{
+		System_out_is_same_as_before() {
+			super(SystemLambda::tapSystemOutNormalized);
 		}
 	}
 }

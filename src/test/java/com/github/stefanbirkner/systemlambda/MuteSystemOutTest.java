@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.stefanbirkner.fishbowl.Fishbowl.ignoreException;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.muteSystemOut;
 import static java.lang.System.out;
 import static java.lang.System.setOut;
@@ -30,30 +29,11 @@ class MuteSystemOutTest {
 	}
 
 	@Nested
-	class System_out_is_same_as_before {
-		@Test
-		void after_statement_is_executed(
-		) throws Exception {
-			PrintStream originalOut = out;
-			muteSystemOut(
-				() -> {
-				}
-			);
-			assertThat(out).isSameAs(originalOut);
-		}
-
-		@Test
-		void after_statement_throws_exception(
-		) {
-			PrintStream originalOut = out;
-			ignoreException(
-				() -> muteSystemOut(
-					() -> {
-						throw new Exception("some exception");
-					}
-				)
-			);
-			assertThat(out).isSameAs(originalOut);
+	class System_out_is_same_as_before
+		extends RestoreSystemOutChecks
+	{
+		System_out_is_same_as_before() {
+			super(SystemLambda::muteSystemOut);
 		}
 	}
 }

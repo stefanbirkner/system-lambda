@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.stefanbirkner.fishbowl.Fishbowl.ignoreException;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.muteSystemErr;
 import static java.lang.System.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,29 +28,11 @@ class MuteSystemErrTest {
 	}
 
 	@Nested
-	class System_err_is_same_as_before {
-		@Test
-		void after_statement_is_executed(
-		) throws Exception {
-			PrintStream originalErr = err;
-			muteSystemErr(
-				() -> {
-				}
-			);
-			assertThat(err).isSameAs(originalErr);
-		}
-
-		@Test
-		void after_statement_throws_exception() {
-			PrintStream originalErr = err;
-			ignoreException(
-				() -> muteSystemErr(
-					() -> {
-						throw new Exception("some exception");
-					}
-				)
-			);
-			assertThat(err).isSameAs(originalErr);
+	class System_err_is_same_as_before
+		extends RestoreSystemErrChecks
+	{
+		System_err_is_same_as_before() {
+			super(SystemLambda::muteSystemErr);
 		}
 	}
 }
