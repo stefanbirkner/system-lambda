@@ -20,7 +20,7 @@ System Lambda is available from
 <dependency>
     <groupId>com.github.stefanbirkner</groupId>
     <artifactId>system-lambda</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 
@@ -124,7 +124,7 @@ different operating systems.
 void application_writes_text_to_System_err(
 ) throws Exception {
   String text = tapSystemErr(() -> {
-    System.err.println("some text");
+    System.err.print("some text");
   });
   assertEquals("some text", text);
 }
@@ -136,14 +136,14 @@ void application_writes_mutliple_lines_to_System_err(
     System.err.println("first line");
     System.err.println("second line");
   });
-  assertEquals("first line\nsecond line", text);
+  assertEquals("first line\nsecond line\n", text);
 }
 
 @Test
 void application_writes_text_to_System_out(
 ) throws Exception {
   String text = tapSystemOut(() -> {
-    System.out.println("some text");
+    System.out.print("some text");
   });
   assertEquals("some text", text);
 }
@@ -155,7 +155,7 @@ void application_writes_mutliple_lines_to_System_out(
     System.out.println("first line");
     System.out.println("second line");
   });
-  assertEquals("first line\nsecond line", text);
+  assertEquals("first line\nsecond line\n", text);
 }
 ```
 
