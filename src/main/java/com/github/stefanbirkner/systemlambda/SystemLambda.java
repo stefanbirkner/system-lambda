@@ -87,8 +87,11 @@ import static java.util.stream.Collectors.joining;
  * applications you need to test the output of these applications. The methods
  * {@link #tapSystemErr(Statement) tapSystemErr},
  * {@link #tapSystemErrNormalized(Statement) tapSystemErrNormalized},
- * {@link #tapSystemOut(Statement) tapSystemOut} and
- * {@link #tapSystemOutNormalized(Statement) tapSystemOutNormalized} allow you
+ * {@link #tapSystemOut(Statement) tapSystemOut},
+ * {@link #tapSystemOutNormalized(Statement) tapSystemOutNormalized},
+ * {@link #tapSystemErrAndOut(Statement) tapSystemErrAndOut} and
+ * {@link #tapSystemErrAndOutNormalized(Statement) tapSystemErrAndOutNormalized}
+ * allow you
  * to tap the text that is written to {@code System.err}/{@code System.out}. The
  * methods with the suffix {@code Normalized} normalize line breaks to
  * {@code \n} so that you can run tests with the same assertions on different
@@ -131,6 +134,26 @@ import static java.util.stream.Collectors.joining;
  *     System.out.println("second line");
  *   });
  *   assertEquals(text, "first line\nsecond line\n");
+ * }
+ *
+ * &#064;Test
+ * void application_writes_text_to_System_err_and_out(
+ * ) throws Exception {
+ *   String text = tapSystemErrAndOut((){@literal ->} {
+ *     System.err.print("text from err");
+ *     System.out.print("text from out");
+ *   });
+ *   assertEquals("text from errtext from out", text);
+ * }
+ *
+ * &#064;Test
+ * void application_writes_mutliple_lines_to_System_err_and_out(
+ * ) throws Exception {
+ *   String text = tapSystemErrAndOutNormalized((){@literal ->} {
+ *     System.err.println("text from err");
+ *     System.out.println("text from out");
+ *   });
+ *   assertEquals("text from err\ntext from out\n", text);
  * }</pre>
  *
  * <p>You can assert that nothing is written to
@@ -509,6 +532,8 @@ public class SystemLambda {
 	 * @return text that is written to {@code System.err} by the statement.
 	 * @throws Exception any exception thrown by the statement.
 	 * @see #tapSystemOut(Statement)
+	 * @see #tapSystemErrAndOut(Statement)
+	 * @see #tapSystemErrAndOutNormalized(Statement)
 	 * @since 1.0.0
 	 */
 	public static String tapSystemErr(
@@ -541,12 +566,88 @@ public class SystemLambda {
 	 * @return text that is written to {@code System.err} by the statement.
 	 * @throws Exception any exception thrown by the statement.
 	 * @see #tapSystemOut(Statement)
+	 * @see #tapSystemErrAndOut(Statement)
+	 * @see #tapSystemErrAndOutNormalized(Statement)
 	 * @since 1.0.0
 	 */
 	public static String tapSystemErrNormalized(
 		Statement statement
 	) throws Exception {
 		return tapSystemErr(statement)
+			.replace(lineSeparator(), "\n");
+	}
+
+	/**
+	 * Executes the statement and returns the text that was written to
+	 * {@code System.err} and {@code System.out} by the statement.
+	 * <pre>
+	 * &#064;Test
+	 * void application_writes_text_to_System_err_and_out(
+	 * ) throws Exception {
+	 *   String text = tapSystemErrAndOut((){@literal ->} {
+	 *     System.err.print("text from err");
+	 *     System.out.print("text from out");
+	 *   });
+	 *   assertEquals("text from errtext from out", text);
+	 * }
+	 * </pre>
+	 *
+	 * @param statement an arbitrary piece of code.
+	 * @return text that is written to {@code System.err} and {@code System.out}
+	 * by the statement.
+	 * @throws Exception any exception thrown by the statement.
+	 * @see #tapSystemErrAndOutNormalized(Statement)
+	 * @see #tapSystemErr(Statement)
+	 * @see #tapSystemErrNormalized(Statement)
+	 * @see #tapSystemOut(Statement)
+	 * @see #tapSystemOutNormalized(Statement)
+	 * @since 1.2.0
+	 */
+	public static String tapSystemErrAndOut(
+		Statement statement
+	) throws Exception {
+		TapStream tapStream = new TapStream();
+		executeWithSystemErrReplacement(
+			tapStream,
+			() -> executeWithSystemOutReplacement(
+					tapStream,
+					statement
+			)
+		);
+		return tapStream.textThatWasWritten();
+	}
+
+	/**
+	 * Executes the statement and returns the text that was written to
+	 * {@code System.err} and {@code System.out} by the statement. New line
+	 * characters are replaced with a single {@code \n}.
+	 * <pre>
+	 * &#064;Test
+	 * void application_writes_mutliple_lines_to_System_err_and_out(
+	 * ) throws Exception {
+	 *   String text = tapSystemErrAndOutNormalized((){@literal ->} {
+	 *     System.err.println("text from err");
+	 *     System.out.println("text from out");
+	 *   });
+	 *   assertEquals("text from err\ntext from out\n", text);
+	 * }
+	 * </pre>
+	 *
+	 * @param statement an arbitrary piece of code.
+	 * @return text that is written to {@code System.err} and {@code System.out}
+	 * by the statement.
+	 * @throws Exception any exception thrown by the statement.
+	 * @see #tapSystemErrAndOut(Statement)
+	 * @see #tapSystemErr(Statement)
+	 * @see #tapSystemErrNormalized(Statement)
+	 * @see #tapSystemOut(Statement)
+	 * @see #tapSystemOutNormalized(Statement)
+	 * @since 1.2.0
+	 */
+	public static String tapSystemErrAndOutNormalized(
+		Statement statement
+	) throws Exception {
+		return tapSystemErrAndOut(statement)
 			.replace(lineSeparator(), "\n");
 	}
 
@@ -568,6 +669,8 @@ public class SystemLambda {
 	 * @return text that is written to {@code System.out} by the statement.
 	 * @throws Exception any exception thrown by the statement.
 	 * @see #tapSystemErr(Statement)
+	 * @see #tapSystemErrAndOut(Statement)
+	 * @see #tapSystemErrAndOutNormalized(Statement)
 	 * @since 1.0.0
 	 */
 	public static String tapSystemOut(
@@ -600,6 +703,8 @@ public class SystemLambda {
 	 * @return text that is written to {@code System.out} by the statement.
 	 * @throws Exception any exception thrown by the statement.
 	 * @see #tapSystemErr(Statement)
+	 * @see #tapSystemErrAndOut(Statement)
+	 * @see #tapSystemErrAndOutNormalized(Statement)
 	 * @since 1.0.0
 	 */
 	public static String tapSystemOutNormalized(
