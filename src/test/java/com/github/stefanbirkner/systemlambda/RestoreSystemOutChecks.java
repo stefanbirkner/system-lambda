@@ -7,7 +7,7 @@ import java.io.PrintStream;
 import static com.github.stefanbirkner.fishbowl.Fishbowl.ignoreException;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RestoreSystemOutChecks {
+abstract class RestoreSystemOutChecks {
 
 	private final MethodUnderTest methodUnderTest;
 
