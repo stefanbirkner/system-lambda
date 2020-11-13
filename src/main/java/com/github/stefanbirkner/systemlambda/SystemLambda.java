@@ -1,8 +1,10 @@
 package com.github.stefanbirkner.systemlambda;
 
+import javax.print.DocFlavor;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.security.Permission;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -913,16 +915,16 @@ public class SystemLambda {
 
 
 		private static class ReplacementInputStream extends InputStream {
-			private final StringReader reader;
 			private final IOException ioException;
 			private final RuntimeException runtimeException;
+			private final ByteArrayInputStream byteArrayInputStream;
 
 			ReplacementInputStream(
 				String text,
 				IOException ioException,
 				RuntimeException runtimeException
 			) {
-				this.reader = new StringReader(text);
+				this.byteArrayInputStream = new ByteArrayInputStream(text.getBytes(defaultCharset()));
 				this.ioException = ioException;
 				this.runtimeException = runtimeException;
 			}
@@ -930,7 +932,7 @@ public class SystemLambda {
 			@Override
 			public int read(
 			) throws IOException {
-				int character = reader.read();
+				int character = byteArrayInputStream.read();
 				if (character == -1)
 					handleEmptyReader();
 				return character;
@@ -942,66 +944,6 @@ public class SystemLambda {
 					throw ioException;
 				else if (runtimeException != null)
 					throw runtimeException;
-			}
-
-			@Override
-			public int read(
-				byte[] buffer,
-				int offset,
-				int len
-			) throws IOException {
-				if (buffer == null)
-					throw new NullPointerException();
-				else if (offset < 0 || len < 0 || len > buffer.length - offset)
-					throw new IndexOutOfBoundsException();
-				else if (len == 0)
-					return 0;
-				else
-					return readNextLine(buffer, offset, len);
-			}
-
-			private int readNextLine(
-				byte[] buffer,
-				int offset,
-				int len
-			) throws IOException {
-				int c = read();
-				if (c == -1)
-					return -1;
-				buffer[offset] = (byte) c;
-
-				int i = 1;
-				for (; (i < len) && !isCompleteLineWritten(buffer, i - 1); ++i) {
-					byte read = (byte) read();
-					if (read == -1)
-						break;
-					else
-						buffer[offset + i] = read;
-				}
-				return i;
-			}
-
-			private boolean isCompleteLineWritten(
-				byte[] buffer,
-				int indexLastByteWritten
-			) {
-				byte[] separator = getProperty("line.separator")
-					.getBytes(defaultCharset());
-				int indexFirstByteOfSeparator = indexLastByteWritten
-					- separator.length + 1;
-				return indexFirstByteOfSeparator >= 0
-					&& contains(buffer, separator, indexFirstByteOfSeparator);
-			}
-
-			private boolean contains(
-				byte[] array,
-				byte[] pattern,
-				int indexStart
-			) {
-				for (int i = 0; i < pattern.length; ++i)
-					if (array[indexStart + i] != pattern[i])
-						return false;
-				return true;
 			}
 		}
 	}

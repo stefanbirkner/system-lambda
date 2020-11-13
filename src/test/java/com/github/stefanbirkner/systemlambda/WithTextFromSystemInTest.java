@@ -37,18 +37,19 @@ class WithTextFromSystemInTest {
 	@Test
 	void provided_text_is_available_from_system_in(
 	) throws Exception {
+		AtomicReference<String> firstLineCapture = new AtomicReference<>();
 		AtomicReference<String> secondLineCapture = new AtomicReference<>();
 
 		withTextFromSystemIn(
 			"first line",
 			"second line"
 		).execute(() -> {
-			Scanner firstScanner = new Scanner(in);
-			firstScanner.nextLine();
-			Scanner secondScanner = new Scanner(in);
-			secondLineCapture.set(secondScanner.nextLine());
+			Scanner scanner = new Scanner(in);
+			firstLineCapture.set(scanner.nextLine());
+			secondLineCapture.set(scanner.nextLine());
 		});
 
+		assertThat(firstLineCapture).hasValue("first line");
 		assertThat(secondLineCapture).hasValue("second line");
 	}
 
