@@ -325,7 +325,7 @@ void Scanner_reads_text_from_System_in() throws Exception {
   withTextFromSystemIn("first line", "second line")
     .execute(() -> {
       Scanner scanner = new Scanner(System.in);
-      scanner.nextLine();
+      assertEquals("first line", scanner.nextLine());
       assertEquals("second line", scanner.nextLine());
     });
 }

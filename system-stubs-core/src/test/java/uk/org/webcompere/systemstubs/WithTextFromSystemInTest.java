@@ -33,8 +33,8 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
-	void provided_text_is_available_from_system_in(
-	) throws Exception {
+	void provided_text_is_available_from_system_in() throws Exception {
+		AtomicReference<String> firstLineCapture = new AtomicReference<>();
 		AtomicReference<String> secondLineCapture = new AtomicReference<>();
 
 		withTextFromSystemIn(
@@ -42,17 +42,16 @@ class WithTextFromSystemInTest {
 			"second line"
 		).execute(() -> {
 			Scanner firstScanner = new Scanner(in);
-			firstScanner.nextLine();
-			Scanner secondScanner = new Scanner(in);
-			secondLineCapture.set(secondScanner.nextLine());
+			firstLineCapture.set(firstScanner.nextLine());
+			secondLineCapture.set(firstScanner.nextLine());
 		});
 
+		assertThat(firstLineCapture).hasValue("first line");
 		assertThat(secondLineCapture).hasValue("second line");
 	}
 
 	@Test
-	void no_text_is_available_from_system_in_if_no_text_has_been_provided(
-	) throws Exception {
+	void no_text_is_available_from_system_in_if_no_text_has_been_provided() throws Exception {
 		AtomicInteger charCapture = new AtomicInteger();
 
 		withTextFromSystemIn()
@@ -64,8 +63,7 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
-	void system_in_provides_specified_text_and_throws_requested_IOException_afterwards(
-	) throws Exception {
+	void system_in_provides_specified_text_and_throws_requested_IOException_afterwards() throws Exception {
 		withTextFromSystemIn("arbitrary text")
 			.andExceptionThrownOnInputEnd(DUMMY_IO_EXCEPTION)
 			.execute(() -> {
@@ -76,8 +74,7 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
-	void system_in_throws_requested_IOException_on_first_read_if_no_text_has_been_specified(
-	) throws Exception {
+	void system_in_throws_requested_IOException_on_first_read_if_no_text_has_been_specified() throws Exception {
 		withTextFromSystemIn()
 			.andExceptionThrownOnInputEnd(DUMMY_IO_EXCEPTION)
 			.execute(() -> {
@@ -87,8 +84,7 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
-	void system_in_provides_specified_text_and_throws_requested_RuntimeException_afterwards(
-	) throws Exception {
+	void system_in_provides_specified_text_and_throws_requested_RuntimeException_afterwards() throws Exception {
 		withTextFromSystemIn("arbitrary text")
 			.andExceptionThrownOnInputEnd(DUMMY_RUNTIME_EXCEPTION)
 			.execute(() -> {
@@ -99,8 +95,7 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
-	void system_in_throws_requested_RuntimeException_on_first_read_if_no_text_has_been_specified(
-	) throws Exception {
+	void system_in_throws_requested_RuntimeException_on_first_read_if_no_text_has_been_specified() throws Exception {
 		withTextFromSystemIn()
 			.andExceptionThrownOnInputEnd(DUMMY_RUNTIME_EXCEPTION)
 			.execute(() -> {
@@ -118,7 +113,7 @@ class WithTextFromSystemInTest {
 				.execute(() -> {});
 		}).hasMessage(
 				"You cannot call andExceptionThrownOnInputEnd(IOException)"
-					+ " because andExceptionThrownOnInputEnd(RuntimeException) has"
+					+ " because andExceptionThrownOnInputEnd has"
 					+ " already been called.");
 	}
 
@@ -131,14 +126,13 @@ class WithTextFromSystemInTest {
 				.execute(() -> {});
 		}).hasMessage(
 				"You cannot call andExceptionThrownOnInputEnd(RuntimeException)"
-					+ " because andExceptionThrownOnInputEnd(IOException) has"
+					+ " because andExceptionThrownOnInputEnd has"
 					+ " already been called.");
 	}
 
 	//this is default behaviour of an InputStream according to its JavaDoc
 	@Test
-	void system_in_throws_NullPointerException_when_read_is_called_with_null_array(
-	) throws Exception {
+	void system_in_throws_NullPointerException_when_read_is_called_with_null_array() throws Exception {
 		withTextFromSystemIn("arbitrary text")
 			.execute(() -> {
 				Throwable exception = catchThrowable(
@@ -151,8 +145,7 @@ class WithTextFromSystemInTest {
 
 	//this is default behaviour of an InputStream according to its JavaDoc
 	@Test
-	void system_in_throws_IndexOutOfBoundsException_when_read_is_called_with_negative_offset(
-	) throws Exception {
+	void system_in_throws_IndexOutOfBoundsException_when_read_is_called_with_negative_offset() throws Exception {
 		withTextFromSystemIn("arbitrary text")
 			.execute(() -> {
 				Throwable exception = catchThrowable(
@@ -165,8 +158,7 @@ class WithTextFromSystemInTest {
 
 	//this is default behaviour of an InputStream according to its JavaDoc
 	@Test
-	void system_in_throws_IndexOutOfBoundsException_when_read_is_called_with_negative_length(
-	) throws Exception {
+	void system_in_throws_IndexOutOfBoundsException_when_read_is_called_with_negative_length() throws Exception {
 		withTextFromSystemIn("arbitrary text")
 			.execute(() -> {
 				Throwable exception = catchThrowable(
@@ -179,8 +171,7 @@ class WithTextFromSystemInTest {
 
 	//this is default behaviour of an InputStream according to its JavaDoc
 	@Test
-	void system_in_throws_IndexOutOfBoundsException_when_read_is_called_with_oversized_length(
-	) throws Exception {
+	void system_in_throws_IndexOutOfBoundsException_when_read_is_called_with_oversized_length() throws Exception {
 		withTextFromSystemIn("arbitrary text")
 			.execute(() -> {
 				Throwable exception = catchThrowable(() -> {
@@ -193,8 +184,7 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
-	void system_in_reads_zero_bytes_even_if_mock_should_throw_IOException_on_input_end(
-	) throws Exception {
+	void system_in_reads_zero_bytes_even_if_mock_should_throw_IOException_on_input_end() throws Exception {
 		withTextFromSystemIn()
 			.andExceptionThrownOnInputEnd(DUMMY_IO_EXCEPTION)
 			.execute(() -> {
@@ -204,8 +194,7 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
-	void system_in_reads_zero_bytes_even_if_mock_should_throw_RuntimeException_on_input_end(
-	) throws Exception {
+	void system_in_reads_zero_bytes_even_if_mock_should_throw_RuntimeException_on_input_end() throws Exception {
 		withTextFromSystemIn()
 			.andExceptionThrownOnInputEnd(DUMMY_RUNTIME_EXCEPTION)
 			.execute(() -> {
@@ -215,8 +204,7 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
-	void system_in_read_bytes_throws_specified_IOException_on_input_end(
-	) throws Exception {
+	void system_in_read_bytes_throws_specified_IOException_on_input_end() throws Exception {
 		withTextFromSystemIn()
 			.andExceptionThrownOnInputEnd(DUMMY_IO_EXCEPTION)
 			.execute(() -> {
@@ -231,8 +219,7 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
-	void system_in_read_bytes_throws_specified_RuntimeException_on_input_end(
-	) throws Exception {
+	void system_in_read_bytes_throws_specified_RuntimeException_on_input_end() throws Exception {
 		AtomicReference<Throwable> exceptionCapture = new AtomicReference<>();
 
 		withTextFromSystemIn()
@@ -254,8 +241,7 @@ class WithTextFromSystemInTest {
 	@Nested
 	class System_in_is_same_as_before {
 		@Test
-		void after_statement_is_executed(
-		) throws Exception {
+		void after_statement_is_executed() throws Exception {
 			InputStream originalSystemIn = System.in;
 
 			withTextFromSystemIn("arbitrary text")
@@ -265,8 +251,7 @@ class WithTextFromSystemInTest {
 		}
 
 		@Test
-		void after_statement_throws_exception(
-		) {
+		void after_statement_throws_exception() {
 			InputStream originalSystemIn = System.in;
 
 			catchThrowable(
@@ -282,11 +267,10 @@ class WithTextFromSystemInTest {
 		}
 	}
 
-	private static void assertSystemInProvidesText(
-		String text
-	) throws IOException {
-		for (char c : text.toCharArray())
-			assertThat((char) System.in.read()).isSameAs(c);
+	private static void assertSystemInProvidesText(String text) throws IOException {
+		for (char c : text.toCharArray()) {
+            assertThat((char) System.in.read()).isSameAs(c);
+        }
 	}
 }
 

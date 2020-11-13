@@ -7,6 +7,7 @@ import uk.org.webcompere.systemstubs.resource.TestResource;
 import uk.org.webcompere.systemstubs.security.SecurityManagerStub;
 import uk.org.webcompere.systemstubs.security.SystemExit;
 import uk.org.webcompere.systemstubs.stream.*;
+import uk.org.webcompere.systemstubs.stream.alt.LinesAltStream;
 import uk.org.webcompere.systemstubs.stream.output.DisallowWriteStream;
 import uk.org.webcompere.systemstubs.stream.output.NoopStream;
 import uk.org.webcompere.systemstubs.stream.output.Output;
@@ -794,13 +795,8 @@ public class SystemStubs {
 	 * @see SystemIn#andExceptionThrownOnInputEnd(IOException)
 	 * @see SystemIn#andExceptionThrownOnInputEnd(RuntimeException)
 	 */
-    public static SystemIn withTextFromSystemIn(
-    	String... lines
-	) {
-    	String text = stream(lines)
-			.map(line -> line + lineSeparator())
-			.collect(joining());
-    	return new SystemIn(text);
+    public static SystemIn withTextFromSystemIn(String... lines) {
+    	return new SystemIn(new LinesAltStream(lines));
 	}
 
 }
