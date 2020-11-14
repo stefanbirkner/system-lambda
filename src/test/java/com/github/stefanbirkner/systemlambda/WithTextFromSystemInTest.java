@@ -89,6 +89,45 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
+	void scanner_can_read_all_lines_when_exception_at_end(
+	) throws Exception {
+		withTextFromSystemIn("arbitrary", "text")
+			.andExceptionThrownOnInputEnd(DUMMY_IO_EXCEPTION)
+			.execute(() -> {
+				Scanner scanner = new Scanner(System.in);
+				scanner.nextLine();
+				scanner.nextLine();
+			});
+	}
+
+	@Test
+	void scanner_cannot_read_beyond_last_line(
+	) throws Exception {
+		withTextFromSystemIn("arbitrary", "text")
+			.execute(() -> {
+				Scanner scanner = new Scanner(System.in);
+				scanner.nextLine();
+				scanner.nextLine();
+				Throwable exception = exceptionThrownBy(scanner::nextLine);
+				assertThat(exception).hasMessage("No line found");
+			});
+	}
+
+	@Test
+	void scanner_fails_with_thrown_exception_when_exception_at_end(
+	) throws Exception {
+		withTextFromSystemIn("arbitrary", "text")
+			.andExceptionThrownOnInputEnd(DUMMY_RUNTIME_EXCEPTION)
+			.execute(() -> {
+				Scanner scanner = new Scanner(System.in);
+				scanner.nextLine();
+				scanner.nextLine();
+				Throwable exception = exceptionThrownBy(scanner::nextLine);
+				assertThat(exception).isSameAs(DUMMY_RUNTIME_EXCEPTION);
+			});
+	}
+
+	@Test
 	void system_in_provides_specified_text_and_throws_requested_RuntimeException_afterwards(
 	) throws Exception {
 		withTextFromSystemIn("arbitrary text")
