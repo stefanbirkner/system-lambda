@@ -938,6 +938,15 @@ public class SystemLambda {
 				return character;
 			}
 
+			@Override
+			public int read(byte[] b, int off, int len) throws IOException {
+				int bytesRead = byteArrayInputStream.read(b, off, len);
+				if (len > 0 && bytesRead < 0)
+					handleEmptyReader();
+
+				return bytesRead;
+			}
+
 			private void handleEmptyReader(
 			) throws IOException {
 				if (ioException != null)

@@ -202,24 +202,24 @@ class WithTextFromSystemInTest {
 	}
 
 	@Test
-	void system_in_reads_zero_bytes_even_if_mock_should_throw_IOException_on_input_end(
+	void system_in_reads_no_bytes_even_if_mock_should_throw_IOException_on_input_end(
 	) throws Exception {
 		withTextFromSystemIn()
 			.andExceptionThrownOnInputEnd(DUMMY_IO_EXCEPTION)
 			.execute(() -> {
 				int numBytesRead = System.in.read(DUMMY_ARRAY, VALID_OFFSET, 0);
-				assertThat(numBytesRead).isZero();
+				assertThat(numBytesRead).isEqualTo(-1);
 			});
 	}
 
 	@Test
-	void system_in_reads_zero_bytes_even_if_mock_should_throw_RuntimeException_on_input_end(
+	void system_in_reads_no_bytes_even_if_mock_should_throw_RuntimeException_on_input_end(
 	) throws Exception {
 		withTextFromSystemIn()
 			.andExceptionThrownOnInputEnd(DUMMY_RUNTIME_EXCEPTION)
 			.execute(() -> {
 				int numBytesRead = System.in.read(DUMMY_ARRAY, VALID_OFFSET, 0);
-				assertThat(numBytesRead).isZero();
+				assertThat(numBytesRead).isEqualTo(-1);
 			});
 	}
 
