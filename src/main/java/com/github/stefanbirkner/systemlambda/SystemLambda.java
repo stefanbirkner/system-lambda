@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.security.Permission;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static java.lang.Class.forName;
 import static java.lang.System.*;
@@ -522,6 +523,12 @@ public class SystemLambda {
 		return tapStream.textThatWasWritten();
 	}
 
+	public static Collection<String> tapSystemErrToCollection(
+			Statement statement
+	) throws Exception {
+		return toCollection(tapSystemOut(statement));
+	}
+
 	/**
 	 * Executes the statement and returns the text that was written to
 	 * {@code System.err} by the statement. New line characters are replaced
@@ -579,6 +586,12 @@ public class SystemLambda {
 			statement
 		);
 		return tapStream.textThatWasWritten();
+	}
+
+	public static Collection<String> tapSystemOutToCollection(
+			Statement statement
+	) throws Exception {
+		return toCollection(tapSystemOut(statement));
 	}
 
 	/**
@@ -805,6 +818,13 @@ public class SystemLambda {
 			AUTO_FLUSH,
 			DEFAULT_ENCODING
 		);
+	}
+
+	private static Collection<String> toCollection(
+			String value
+	) {
+		String[] lines = value.split(System.lineSeparator());
+		return Arrays.stream(lines).collect(Collectors.toList());
 	}
 
 	private static class DisallowWriteStream extends OutputStream {

@@ -5,7 +5,10 @@ import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+
 import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut;
+import static com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOutToCollection;
 import static java.lang.System.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,6 +27,17 @@ class TapSystemOutTest {
 	}
 
 	@Test
+	void taps_text_that_is_written_to_System_out_by_statement_to_collection(
+	) throws Exception {
+		Collection<String> linesWrittenToSystemOut = tapSystemOutToCollection(
+				() -> { out.println("some text"); out.println("more text"); }
+		);
+
+		assertThat(linesWrittenToSystemOut)
+				.containsExactly("some text", "more text");
+	}
+
+	@Test
 	void tapped_text_is_empty_when_statement_does_not_write_to_System_out(
 	) throws Exception {
 		String textWrittenToSystemOut = tapSystemOut(
@@ -31,7 +45,7 @@ class TapSystemOutTest {
 		);
 
 		assertThat(textWrittenToSystemOut)
-			.isEqualTo("");
+			.isEmpty();
 	}
 
 	@Nested
