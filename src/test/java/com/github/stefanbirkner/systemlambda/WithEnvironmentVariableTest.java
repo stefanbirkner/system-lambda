@@ -266,9 +266,9 @@ class WithEnvironmentVariableTest {
 
 			ignoreException(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-						.execute(() -> {
-							throw new RuntimeException("dummy exception"); }
-						)
+					.execute(() -> {
+						throw new RuntimeException("dummy exception"); }
+					)
 			);
 
 			assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
@@ -320,10 +320,10 @@ class WithEnvironmentVariableTest {
 
 			ignoreException(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-						.execute(() -> {
-									throw new RuntimeException("dummy exception");
-								}
-						)
+					.execute(() -> {
+							throw new RuntimeException("dummy exception");
+						}
+					)
 			);
 
 			assertThat(getenv("dummy name")).isEqualTo(originalValue);
