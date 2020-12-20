@@ -1131,6 +1131,7 @@ public class SystemLambda {
 		 * @param <T> the type of {@code callable}'s result
 		 * @param callable an arbitrary piece of code.
 		 * @return the return value of {@code callable}.
+		 * @throws Exception the callable may throw an arbitrary exception.
 		 * @since 1.1.0
 		 * @see #withEnvironmentVariable(String, String)
 		 * @see #and(String, String)
@@ -1178,6 +1179,7 @@ public class SystemLambda {
 		 * environment variables map. It fails if your {@code SecurityManager} forbids
 		 * such modifications.
 		 * @param statement an arbitrary piece of code.
+		 * @throws Exception the statement may throw an arbitrary exception.
 		 * @since 1.0.0
 		 * @see #withEnvironmentVariable(String, String)
 		 * @see WithEnvironmentVariables#and(String, String)
