@@ -1138,13 +1138,11 @@ public class SystemLambda {
 		 */
 		public <T> T execute(
 			Callable<T> callable
-		) {
+		) throws Exception {
 			Map<String, String> originalVariables = new HashMap<>(getenv());
 			try {
 				setEnvironmentVariables();
 				return callable.call();
-			} catch (Exception e) {
-				throw new SystemLambdaExecutionException(e);
 			} finally {
 				restoreOriginalVariables(originalVariables);
 			}
@@ -1187,13 +1185,11 @@ public class SystemLambda {
 		 */
     	public void execute(
     		Statement statement
-		) {
+		) throws Exception {
     		Map<String, String> originalVariables = new HashMap<>(getenv());
     		try {
 				setEnvironmentVariables();
 				statement.execute();
-			} catch (Exception e) {
-    			throw new SystemLambdaExecutionException(e);
 			} finally {
 				restoreOriginalVariables(originalVariables);
 			}
