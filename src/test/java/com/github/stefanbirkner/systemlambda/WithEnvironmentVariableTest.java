@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import static com.github.stefanbirkner.fishbowl.Fishbowl.ignoreException;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
@@ -250,7 +251,9 @@ class WithEnvironmentVariableTest {
 
 			ignoreException(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(new FailingCallableMock())
+					.execute((Callable<String>) () -> {
+						throw new RuntimeException("dummy exception");
+					})
 			);
 
 			assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
@@ -301,7 +304,9 @@ class WithEnvironmentVariableTest {
 
 			ignoreException(
 				() -> withEnvironmentVariable("dummy name", randomValue())
-					.execute(new FailingCallableMock())
+					.execute((Callable<String>) () -> {
+						throw new RuntimeException("dummy exception");
+					})
 			);
 
 			assertThat(getenv("dummy name")).isEqualTo(originalValue);

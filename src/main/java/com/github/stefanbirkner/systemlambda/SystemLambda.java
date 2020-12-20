@@ -99,7 +99,7 @@ import static java.util.stream.Collectors.joining;
  * void application_writes_text_to_System_err(
  * ) throws Exception {
  *   String text = tapSystemErr((){@literal ->} {
- *     System.err.println("some text");
+ *     System.err.print("some text");
  *   });
  *   assertEquals(text, "some text");
  * }
@@ -111,14 +111,14 @@ import static java.util.stream.Collectors.joining;
  *     System.err.println("first line");
  *     System.err.println("second line");
  *   });
- *   assertEquals(text, "first line\nsecond line");
+ *   assertEquals(text, "first line\nsecond line\n");
  * }
  *
  * &#064;Test
  * void application_writes_text_to_System_out(
  * ) throws Exception {
  *   String text = tapSystemOut((){@literal ->} {
- *     System.out.println("some text");
+ *     System.out.print("some text");
  *   });
  *   assertEquals(text, "some text");
  * }
@@ -130,7 +130,7 @@ import static java.util.stream.Collectors.joining;
  *     System.out.println("first line");
  *     System.out.println("second line");
  *   });
- *   assertEquals(text, "first line\nsecond line");
+ *   assertEquals(text, "first line\nsecond line\n");
  * }</pre>
  *
  * <p>You can assert that nothing is written to

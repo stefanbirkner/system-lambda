@@ -1,6 +1,5 @@
 package com.github.stefanbirkner.systemlambda;
 
-import java.io.PrintStream;
 import java.util.Locale;
 
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -8,9 +7,7 @@ import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.stefanbirkner.fishbowl.Fishbowl.ignoreException;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.assertNothingWrittenToSystemErr;
-import static java.lang.System.err;
 import static java.lang.System.getProperty;
 import static java.util.Locale.CANADA;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -426,29 +423,11 @@ class AssertNothingWrittenToSystemErrTest {
 	}
 
 	@Nested
-	class System_err_is_same_as_before {
-		@Test
-		void after_statement_is_executed(
-		) throws Exception {
-			PrintStream originalErr = err;
-			assertNothingWrittenToSystemErr(
-				() -> {
-				}
-			);
-			assertThat(err).isSameAs(originalErr);
-		}
-
-		@Test
-		void after_statement_throws_exception() {
-			PrintStream originalErr = err;
-			ignoreException(
-				() -> assertNothingWrittenToSystemErr(
-					() -> {
-						throw new Exception("some exception");
-					}
-				)
-			);
-			assertThat(err).isSameAs(originalErr);
+	class System_err_is_same_as_before
+		extends RestoreSystemErrChecks
+	{
+		System_err_is_same_as_before() {
+			super(SystemLambda::assertNothingWrittenToSystemErr);
 		}
 	}
 }

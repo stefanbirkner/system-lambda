@@ -20,7 +20,7 @@ System Lambda is available from
 <dependency>
     <groupId>com.github.stefanbirkner</groupId>
     <artifactId>system-lambda</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 
@@ -102,13 +102,13 @@ void execute_code_that_manipulates_system_properties(
     //code under test that reads properties (e.g. "some.property") or
     //modifies them.
   });
-  
+
   //Here the value of "some.property" is the same like before.
   //E.g. it is not set.
 }
 ```
 
-     
+
 ### System.out and System.err
 
 Command-line applications usually write to the console. If you write such
@@ -124,7 +124,7 @@ different operating systems.
 void application_writes_text_to_System_err(
 ) throws Exception {
   String text = tapSystemErr(() -> {
-    System.err.println("some text");
+    System.err.print("some text");
   });
   assertEquals("some text", text);
 }
@@ -136,14 +136,14 @@ void application_writes_mutliple_lines_to_System_err(
     System.err.println("first line");
     System.err.println("second line");
   });
-  assertEquals("first line\nsecond line", text);
+  assertEquals("first line\nsecond line\n", text);
 }
 
 @Test
 void application_writes_text_to_System_out(
 ) throws Exception {
   String text = tapSystemOut(() -> {
-    System.out.println("some text");
+    System.out.print("some text");
   });
   assertEquals("some text", text);
 }
@@ -155,7 +155,7 @@ void application_writes_mutliple_lines_to_System_out(
     System.out.println("first line");
     System.out.println("second line");
   });
-  assertEquals("first line\nsecond line", text);
+  assertEquals("first line\nsecond line\n", text);
 }
 ```
 
@@ -322,11 +322,11 @@ simply have a question about System Lambda.
 
 ## Development Guide
 
-System Lambda is build with [Maven](http://maven.apache.org/). If you
-want to contribute code than
+System Lambda is built with [Maven](http://maven.apache.org/) and must be
+compiled under JDK 8. If you want to contribute code then
 
 * Please write a test for your change.
-* Ensure that you didn't break the build by running `mvnw test`.
+* Ensure that you didn't break the build by running `mvnw clean verify -Dgpg.skip`.
 * Fork the repo and create a pull request. (See [Understanding the GitHub Flow](https://guides.github.com/introduction/flow/index.html))
 
 The basic coding style is described in the
@@ -334,7 +334,7 @@ The basic coding style is described in the
 
 System Lambda supports [GitHub Actions](https://help.github.com/en/actions)
 (Linux) and [AppVeyor](http://www.appveyor.com/) (Windows) for continuous
-integration. Your pull request will be automatically build by both CI
+integration. Your pull request will be automatically built by both CI
 servers.
 
 
