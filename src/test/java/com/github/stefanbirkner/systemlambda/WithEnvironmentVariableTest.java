@@ -2,23 +2,38 @@ package com.github.stefanbirkner.systemlambda;
 
 import com.github.stefanbirkner.systemlambda.SystemLambda.WithEnvironmentVariables;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static com.github.stefanbirkner.fishbowl.Fishbowl.ignoreException;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
+import static java.lang.Integer.parseInt;
 import static java.lang.System.getenv;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @DisplayNameGeneration(ReplaceUnderscores.class)
 class WithEnvironmentVariableTest {
+
+	@BeforeEach
+	void skipForNewerJavaVersionsWhenEnvironmentVariablesMapCannotBeAccessed(
+	) throws Exception {
+		assumeTrue(
+			javaIsVersion15OrOlder()
+				|| internalEnvironmentsVariableMapIsAccessible()
+		);
+	}
+
 	@Test
 	void callable_is_executed(
 	) throws Exception {
@@ -327,6 +342,32 @@ class WithEnvironmentVariableTest {
 			);
 
 			assertThat(getenv("dummy name")).isEqualTo(originalValue);
+		}
+	}
+
+	private boolean javaIsVersion15OrOlder() {
+		String javaVersion = System.getProperty("java.version");
+		String majorVersion = substringBefore(javaVersion, ".");
+		return parseInt(majorVersion) <= 15;
+	}
+
+	private boolean internalEnvironmentsVariableMapIsAccessible(
+	) throws NoSuchFieldException {
+		try {
+			Field field = getenv().getClass().getDeclaredField("m");
+			field.setAccessible(true); //check whether it can be made accessible
+			field.setAccessible(false); //revert change
+			return true;
+		} catch (Exception e) {
+			// InaccessibleObjectException cannot be explicitly caught because
+			// it does not exist in Java 8.
+			if (e.getClass().getName()
+					.equals("java.lang.reflect.InaccessibleObjectException")
+			) {
+				return false;
+			} else {
+				throw e;
+			}
 		}
 	}
 

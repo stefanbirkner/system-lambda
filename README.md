@@ -355,8 +355,10 @@ The basic coding style is described in the
 
 System Lambda supports [GitHub Actions](https://help.github.com/en/actions)
 (Linux) and [AppVeyor](http://www.appveyor.com/) (Windows) for continuous
-integration. Your pull request will be automatically built by both CI
-servers.
+integration. Each pull request is automatically built by both CI servers.
+GitHub Actions tests with several Java versions (see Enhanced Testing) while
+AppVeyor tests with Java 8 only.
+
 
 ### Build with Docker
 
@@ -366,6 +368,18 @@ The script
 
 builds System Lambda inside a Docker container. It uses your Maven local
 repository. This is helpful if you have a Linux or macOS without JDK 8.
+
+### Enhanced Testing
+
+System Lambda is built with Java 8 and relies on JDK internals that are not
+available from Java 16 on (unless you run Java with additional flags). We verify
+that System Lambda works with newer Java versions by building it with OpenJDK 8
+and executing tests with newer versions of OpenJDK. All this work is put into a
+script that you can run with
+
+    ./scripts/test.sh
+
+The script uses Docker for running the tests.
 
 
 ## Release Guide
