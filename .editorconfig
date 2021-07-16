@@ -9,6 +9,6 @@ insert_final_newline = true
 tab_width = 4
 trim_trailing_whitespace = true
 
-[*.{xml,yml}]
+[*.{sh,xml,yml}]
 indent_size = 2
 indent_style = space
