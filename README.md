@@ -358,6 +358,15 @@ System Lambda supports [GitHub Actions](https://help.github.com/en/actions)
 integration. Your pull request will be automatically built by both CI
 servers.
 
+### Build with Docker
+
+The script
+
+    ./scripts/mvn_in_docker.sh clean verify -Dgpg.skip
+
+builds System Lambda inside a Docker container. It uses your Maven local
+repository. This is helpful if you have a Linux or macOS without JDK 8.
+
 
 ## Release Guide
 
