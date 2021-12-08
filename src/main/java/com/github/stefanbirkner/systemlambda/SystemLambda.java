@@ -239,7 +239,7 @@ import static java.util.stream.Collectors.joining;
  *       Scanner scanner = new Scanner(System.in);
  *       scanner.nextLine();
  *       scanner.nextLine();
- *       assertThrownBy(
+ *       assertThrows(
  *         IOException.class,
  *         (){@literal ->} scanner.readLine()
  *       );
@@ -255,7 +255,7 @@ import static java.util.stream.Collectors.joining;
  *       Scanner scanner = new Scanner(System.in);
  *       scanner.nextLine();
  *       scanner.nextLine();
- *       assertThrownBy(
+ *       assertThrows(
  *	        RuntimeException.class,
  *          (){@literal ->} scanner.readLine()
  *       );
@@ -270,7 +270,7 @@ import static java.util.stream.Collectors.joining;
  *   .andExceptionThrownOnInputEnd(...)
  *   .execute((){@literal ->} {
  *     Scanner scanner = new Scanner(System.in);
- *     assertThrownBy(
+ *     assertThrows(
  *       ...,
  *       (){@literal ->} scanner.readLine()
  *     );
@@ -826,7 +826,7 @@ public class SystemLambda {
 	 *   withTextFromSystemIn()
 	 *     .andExceptionThrownOnInputEnd(new IOException())
 	 *     .execute((){@literal ->} {
-	 *       assertThrownBy(
+	 *       assertThrows(
 	 *         IOException.class,
 	 *         (){@literal ->} new Scanner(System.in).readLine())
 	 *       );
@@ -839,7 +839,7 @@ public class SystemLambda {
 	 *   withTextFromSystemIn()
 	 *    .andExceptionThrownOnInputEnd(new RuntimeException())
 	 *    .execute((){@literal ->} {
-	 *       assertThrownBy(
+	 *       assertThrows(
 	 *         RuntimeException.class,
 	 *         (){@literal ->} new Scanner(System.in).readLine())
 	 *       );
