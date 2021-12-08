@@ -20,7 +20,7 @@ System Lambda is available from
 <dependency>
     <groupId>com.github.stefanbirkner</groupId>
     <artifactId>system-lambda</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
 </dependency>
 ```
 
@@ -263,7 +263,7 @@ void System_in_throws_IOException(
       Scanner scanner = new Scanner(System.in);
       scanner.nextLine();
       scanner.nextLine();
-      assertThrownBy(
+      assertThrows(
         IOException.class,
         () -> scanner.readLine()
       );
@@ -279,7 +279,7 @@ void System_in_throws_RuntimeException(
       Scanner scanner = new Scanner(System.in);
       scanner.nextLine();
       scanner.nextLine();
-      assertThrownBy(
+      assertThrows(
         RuntimeException.class,
         () -> scanner.readLine()
       );
@@ -295,7 +295,7 @@ withTextFromSystemIn()
   .andExceptionThrownOnInputEnd(...)
   .execute(() -> {
     Scanner scanner = new Scanner(System.in);
-    assertThrownBy(
+    assertThrows(
       ...,
       () -> scanner.readLine()
     );
