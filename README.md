@@ -25,7 +25,8 @@ System Lambda is available from
 ```
 
 Please don't forget to add the scope `test` if you're using System Lambda for
-tests only.
+tests only. The [changelog](CHANGELOG.md) lists all the changes of System
+Lambda.
 
 
 ## Usage
@@ -359,6 +360,11 @@ integration. Each pull request is automatically built by both CI servers.
 GitHub Actions tests with several Java versions (see Enhanced Testing) while
 AppVeyor tests with Java 8 only.
 
+### Project Decisions
+
+There are decision records for some decisions that had been made for System
+Lambda. They are stored in the folder
+[doc/Decision Records](doc/Decision%20Records)
 
 ### Build with Docker
 
@@ -386,8 +392,9 @@ The script uses Docker for running the tests.
 
 * Select a new version according to the
   [Semantic Versioning 2.0.0 Standard](http://semver.org/).
+* Update `Changelog.md`.
 * Set the new version in `pom.xml` and in the `Installation` section of
   this readme.
-* Commit the modified `pom.xml` and `README.md`.
+* Commit the modified `Changelog.md`, `pom.xml` and `README.md`.
 * Run `mvnw clean deploy` with JDK 8.
 * Add a tag for the release: `git tag system-lambda-X.X.X`
