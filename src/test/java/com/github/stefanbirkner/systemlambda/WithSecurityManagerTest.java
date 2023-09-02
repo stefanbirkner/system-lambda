@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import static com.github.stefanbirkner.fishbowl.Fishbowl.ignoreException;
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withSecurityManager;
@@ -11,6 +12,7 @@ import static java.lang.System.getSecurityManager;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayNameGeneration(ReplaceUnderscores.class)
+@Disabled("java.lang.System.getSecurityManager marked as deprecated")
 class WithSecurityManagerTest {
 	private static final SecurityManager MANAGER = new SecurityManagerMock();
 

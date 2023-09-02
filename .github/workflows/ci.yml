@@ -1,14 +1,30 @@
-name: CI with different Java versions
+name: System-Lambda build
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+    - 'master'
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
-
-    runs-on: ubuntu-18.04
-
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        java: ['11', '17']
+        javaDistribution: [ 'microsoft' ]
+    name: ${{ matrix.javaDistribution }} ${{ matrix.java }} on ${{ matrix.os}} System-Lambda
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Build and Test
-      run: scripts/test.sh
+    - name: Setup java
+      uses: actions/setup-java@v3
+      with: 
+        distribution: ${{ matrix.javaDistribution }}
+        java-version: ${{ matrix.java }}
+    - name: Build with Maven
+      run: mvn -B compile --file pom.xml -DjavaVersion=${{ matrix.java }}
+    - name: Test with Maven
+      run: mvn -B test --file pom.xml -DjavaVersion=${{ matrix.java }}

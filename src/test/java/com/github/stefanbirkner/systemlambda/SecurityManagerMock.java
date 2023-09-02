@@ -156,18 +156,6 @@ class SecurityManagerMock extends SecurityManager {
 	}
 
 	@Override
-	public void checkSystemClipboardAccess() {
-		logMethodCall("checkSystemClipboardAccess");
-		super.checkSystemClipboardAccess();
-	}
-
-	@Override
-	public void checkAwtEventQueueAccess() {
-		logMethodCall("checkAwtEventQueueAccess");
-		super.checkAwtEventQueueAccess();
-	}
-
-	@Override
 	public void checkPackageAccess(String s) {
 		logMethodCall("checkPackageAccess", String.class, s);
 		super.checkPackageAccess(s);
@@ -201,15 +189,6 @@ class SecurityManagerMock extends SecurityManager {
 	}
 
 	@Override
-	public void checkMemberAccess(Class<?> aClass, int i) {
-		logMethodCall(
-			"checkMemberAccess",
-			new Class[] { Class.class, int.class },
-			aClass, i);
-		super.checkMemberAccess(aClass, i);
-	}
-
-	@Override
 	public void checkSecurityAccess(String s) {
 		logMethodCall("checkSecurityAccess", String.class, s);
 		super.checkSecurityAccess(s);
@@ -222,22 +201,9 @@ class SecurityManagerMock extends SecurityManager {
 	}
 
 	@Override
-	public boolean getInCheck() {
-		logMethodCall("getInCheck");
-		return inCheck;
-	}
-
-	@Override
 	public ThreadGroup getThreadGroup() {
 		logMethodCall("getThreadGroup");
 		return threadGroup;
-	}
-
-	@Override
-	public boolean checkTopLevelWindow(Object window) {
-		logMethodCall("checkTopLevelWindow", Object.class, window);
-		windowOfCheckTopLevelWindowCall = window;
-		return topLevelWindow;
 	}
 
 	void logMethodCall(String name) {

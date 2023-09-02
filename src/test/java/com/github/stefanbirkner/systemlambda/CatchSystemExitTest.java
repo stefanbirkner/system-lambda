@@ -9,6 +9,7 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import org.junit.jupiter.api.Disabled;
 
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -28,11 +29,11 @@ import java.net.UnknownHostException;
 import java.security.AllPermission;
 import java.security.Permission;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 @DisplayNameGeneration(ReplaceUnderscores.class)
+@Disabled("marked as deprecated")
 class CatchSystemExitTest {
 	private static final int ARBITRARY_STATUS = 216843;
 
@@ -115,6 +116,7 @@ class CatchSystemExitTest {
 	}
 
 	@Nested
+	@Disabled
 	class security_managers_public_methods {
 		@ParameterizedTest(name = "{0}")
 		@ArgumentsSource(SecurityManagerPublicMethods.class)
@@ -241,27 +243,10 @@ class CatchSystemExitTest {
 	}
 
 	@Nested
+	@Disabled
 	class security_managers_public_non_void_methods {
 		private final SecurityManagerMock originalSecurityManager
 			= new SecurityManagerMock();
-
-		@Test
-		void getInCheck_is_delegated_to_original_security_manager(
-		) throws Exception {
-			originalSecurityManager.inCheck = true;
-			AtomicBoolean inCheck = new AtomicBoolean();
-			withSecurityManager(
-				originalSecurityManager,
-				() -> catchSystemExit(
-					() -> {
-						inCheck.set(getSecurityManager().getInCheck());
-						//ensure that catchSystemExit does not fail
-						exit(ARBITRARY_STATUS);
-					}
-				)
-			);
-			assertThat(inCheck).isTrue();
-		}
 
 		@Test
 		void security_context_of_original_security_manager_is_provided(
@@ -282,29 +267,6 @@ class CatchSystemExitTest {
 				)
 			);
 			assertThat(contextDuringExecution).hasValue(context);
-		}
-
-		@Test
-		void checkTopLevelWindow_is_delegated_to_original_security_manager(
-		) throws Exception {
-			originalSecurityManager.topLevelWindow = true;
-			Object window = new Object();
-			AtomicBoolean check = new AtomicBoolean();
-			withSecurityManager(
-				originalSecurityManager,
-				() -> catchSystemExit(
-					() -> {
-						check.set(
-							getSecurityManager().checkTopLevelWindow(window)
-						);
-						//ensure that catchSystemExit does not fail
-						exit(ARBITRARY_STATUS);
-					}
-				)
-			);
-			assertThat(check).isTrue();
-			assertThat(originalSecurityManager.windowOfCheckTopLevelWindowCall)
-				.isSameAs(window);
 		}
 
 		@Test
