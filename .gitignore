@@ -1,2 +1,7 @@
 .flattened-pom.xml
 target
+mvnw
+mvnw.cmd
+.mvn/
+.editorconfig
+
