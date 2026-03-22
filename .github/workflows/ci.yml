@@ -32,6 +32,13 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: Library
-      - run: ./mvnw install:install-file -Dfile=system-lambda-1.2.1.jar -DgroupId=com.github.stefanbirkner -DartifactId=system-lambda -Dversion=1.2.1 -Dpackaging=jar -DgeneratePom=true
+      - run: |
+          ./mvnw install:install-file \
+          -Dfile=system-lambda-1.2.1.jar \
+          -DgroupId=com.github.stefanbirkner \
+          -DartifactId=system-lambda \
+          -Dversion=1.2.1 \
+          -Dpackaging=jar \
+          -DgeneratePom=true
       - run: ls -al .
 
