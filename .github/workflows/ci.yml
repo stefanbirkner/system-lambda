@@ -41,5 +41,6 @@ jobs:
           -Dpackaging=jar \
           -DgeneratePom=true
       - run: rm -r src/main/java
+      - run: ./mvnw -f pom.test.xml dependency:tree
       - run: ./mvnw test -f pom.test.xml
 
