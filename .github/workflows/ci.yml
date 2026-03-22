@@ -4,13 +4,22 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-slim
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    strategy:
+      matrix:
+        java: [8, 11, 17]
+
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-java@v5
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v3
       with:
-        java-version: '8'
-        distribution: 'temurin'
+        java-version: ${{ matrix.java }}
+        distribution: temurin
         cache: maven
     - name: Build and Test
-      run: mvn verify pom.xml
+      run: ./mvnw verify -Dgpg.skip
