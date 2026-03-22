@@ -12,5 +12,25 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
         cache: maven
-    - name: Build and Test
-      run: ./mvnw verify -Dgpg.skip
+    - run: ./mvnw verify -Dgpg.skip
+    - run: mkdir library && cp target/*.jar library
+    - uses: actions/upload-artifact@v7
+      with:
+        name: Library
+        path: library
+        retention-days: 1
+  test-jdk17:
+    needs: build
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      - uses: actions/download-artifact@v8
+        with:
+          name: Library
+      - run: ls -al .
+
