@@ -40,5 +40,6 @@ jobs:
           -Dversion=1.2.1 \
           -Dpackaging=jar \
           -DgeneratePom=true
-      - run: ls -al .
+      - run: rm -r src/main/java
+      - run: ./mvnw test -f pom.test.xml
 
