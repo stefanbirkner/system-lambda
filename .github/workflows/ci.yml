@@ -19,14 +19,14 @@ jobs:
         name: Library
         path: library
         retention-days: 1
-  test-jdk17:
+  test-jdk8:
     needs: build
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
         with:
-          java-version: '17'
+          java-version: '9'
           distribution: 'temurin'
           cache: maven
       - uses: actions/download-artifact@v8
